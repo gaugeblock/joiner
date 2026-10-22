@@ -1,0 +1,11 @@
+[package]
+name = "joiner"
+version = "0.0.1-alpha.1"
+edition = "2024"
+authors = ["Colin Wolff"]
+description = "Neurosymbolic code synthesis orchestrator uniting deterministic AST templates with constrained LLMs."
+license = "Apache-2.0"
+repository = "https://github.com/gaugeblock/joiner"
+readme = "README.md"
+keywords = ["ast", "neurosymbolic", "codegen", "llm", "compiler"]
+categories = ["development-tools", "compilers", "command-line-utilities"]
