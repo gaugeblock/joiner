@@ -121,3 +121,4 @@ impl TelemetrySink for MemoryTelemetrySink {
         Ok(count)
     }
 }
+

@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_debug_implementations)]
 
+pub mod engine;
 pub mod error;
 pub mod filler;
 pub mod model;
@@ -13,6 +14,7 @@ pub mod router;
 pub mod telemetry;
 pub mod verifier;
 
+pub use engine::JoinerEngine;
 pub use error::{JoinerError, Result};
 pub use filler::{HoleFillRequest, HoleFiller};
 pub use model::{
