@@ -48,3 +48,21 @@ uuid = { version = "1.10", features = ["v4"] }
 [lints]
 workspace = true
 
+[profile.dev]
+opt-level = 0
+debug = 1
+
+[profile.test]
+opt-level = 0
+debug = 1
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.test.package."*"]
+opt-level = 2
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
