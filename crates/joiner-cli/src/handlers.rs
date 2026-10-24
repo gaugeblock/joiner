@@ -5,6 +5,7 @@ use crate::daemon::run_daemon;
 use joiner_core::JoinerEngine;
 use joiner_core::model::{ExecutionMode, JoinerConfig};
 use joiner_core::telemetry::{FileSpoolSink, TelemetrySink};
+use std::path::Path;
 use std::sync::Arc;
 use storypole_core::index::query::get_all_tasks;
 use storypole_core::store::StorypoleStore;
@@ -108,7 +109,10 @@ pub async fn handle_mcp() -> Result<(), Box<dyn std::error::Error + Send + Sync>
 pub async fn handle_telemetry(
     args: TelemetryArgs,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let sink = FileSpoolSink::new(&args.spool_dir).await?;
+    let spool_dir = args
+        .spool_dir
+        .unwrap_or_else(|| JoinerConfig::default_spool_dir(Path::new(".")));
+    let sink = FileSpoolSink::new(&spool_dir).await?;
     if args.export {
         let entries = sink.export_batch(args.limit).await?;
         for entry in entries {
@@ -116,7 +120,7 @@ pub async fn handle_telemetry(
         }
     } else {
         let pending = sink.list_pending().await?;
-        println!("Telemetry Spool Outbox: {}", args.spool_dir.display());
+        println!("Telemetry Spool Outbox: {}", spool_dir.display());
         println!("Pending traces: {}", pending.len());
     }
     Ok(())

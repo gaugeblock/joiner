@@ -2,7 +2,7 @@
 
 use miter_engine::Language;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
 /// Execution environment mode for synthesis and verification.
@@ -33,6 +33,18 @@ pub struct JoinerConfig {
     pub agent_id: String,
 }
 
+impl JoinerConfig {
+    /// Resolves default telemetry spool directory, preferring `.gaugeblock/spool` if present.
+    pub fn default_spool_dir(root: &Path) -> PathBuf {
+        let gb_spool = root.join(".gaugeblock").join("spool");
+        if gb_spool.is_dir() || root.join(".gaugeblock").is_dir() {
+            gb_spool
+        } else {
+            root.join(".rabbet").join("spool")
+        }
+    }
+}
+
 impl Default for JoinerConfig {
     fn default() -> Self {
         Self {
@@ -40,7 +52,7 @@ impl Default for JoinerConfig {
             execution_mode: ExecutionMode::InPlace,
             parallel_holes: true,
             max_repair_attempts: 3,
-            spool_dir: PathBuf::from(".rabbet/spool"),
+            spool_dir: Self::default_spool_dir(Path::new(".")),
             agent_id: "joiner".to_string(),
         }
     }

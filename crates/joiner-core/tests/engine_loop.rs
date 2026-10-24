@@ -86,6 +86,7 @@ async fn test_engine_event_broadcast_and_synthesis() {
         active_claim: None,
         latest_handoff: None,
         verification_receipt: None,
+        plan: None,
         created_at_epoch_ms: 100,
         updated_at_epoch_ms: 100,
     };

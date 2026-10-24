@@ -171,7 +171,7 @@ async fn handle_status(args: &Value) -> Value {
         Err(e) => json!({ "uninitialized": e.to_string() }),
     };
 
-    let spool_dir = root.join(".rabbet/spool");
+    let spool_dir = joiner_core::model::JoinerConfig::default_spool_dir(&root);
     let spool_sink = FileSpoolSink::new(&spool_dir).await;
     let pending_traces = match spool_sink {
         Ok(s) => s.list_pending().await.map(|v| v.len()).unwrap_or(0),

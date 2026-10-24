@@ -32,6 +32,7 @@ fn make_test_task(title: &str, slug: &str, labels: Vec<String>, symbols: Vec<Str
         active_claim: None,
         latest_handoff: None,
         verification_receipt: None,
+        plan: None,
         created_at_epoch_ms: 1000,
         updated_at_epoch_ms: 1000,
     }

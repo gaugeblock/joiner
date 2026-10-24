@@ -94,9 +94,9 @@ pub struct DaemonArgs {
 /// Arguments for `joiner telemetry`.
 #[derive(Debug, Args)]
 pub struct TelemetryArgs {
-    /// Spool directory path (defaults to '.rabbet/spool').
-    #[arg(long, default_value = ".rabbet/spool")]
-    pub spool_dir: PathBuf,
+    /// Spool directory path (defaults to '.gaugeblock/spool' or '.rabbet/spool').
+    #[arg(long)]
+    pub spool_dir: Option<PathBuf>,
 
     /// Export pending outbox traces to stdout.
     #[arg(long)]
