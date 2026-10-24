@@ -109,7 +109,7 @@ impl JoinerEngine {
             commit_shas: Vec::new(),
         };
 
-        verify_task(&mut store, task.id, Some(receipt), false)?;
+        verify_task(&mut store, task.id, Some(receipt), false, false)?;
         Ok(res)
     }
 
