@@ -103,6 +103,10 @@ impl JoinerEngine {
                 .duration_since(std::time::UNIX_EPOCH)
                 .map_err(|e| JoinerError::SpoolError(e.to_string()))?
                 .as_millis() as u64,
+            git_branch: None,
+            base_commit_sha: None,
+            head_commit_sha: None,
+            commit_shas: Vec::new(),
         };
 
         verify_task(&mut store, task.id, Some(receipt), false)?;
