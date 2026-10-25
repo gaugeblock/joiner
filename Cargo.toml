@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 edition = "2024"
 authors = ["Colin Wolff <1562545+colinwolff@users.noreply.github.com>"]
 license = "Apache-2.0"
@@ -35,12 +35,12 @@ readme = "README.md"
 description = "Master neurosymbolic synthesis orchestrator for the gaugeblock suite"
 
 [dependencies]
-joiner-core = { path = "crates/joiner-core", version = "0.1.0-beta.1" }
+joiner-core = { path = "crates/joiner-core", version = "0.1.0-beta.2" }
 
 [dev-dependencies]
-dado-core = "0.1.0-beta.1"
-sawhorse-core = "0.1.0-beta.1"
-storypole-core = "0.1.0-beta.1"
+dado-core = "0.1.0-beta.2"
+sawhorse-core = "0.1.0-beta.2"
+storypole-core = "0.1.0-beta.2"
 tempfile = "3.10"
 tokio = { version = "1.43", features = ["rt-multi-thread", "macros", "net", "sync"] }
 uuid = { version = "1.10", features = ["v4"] }

@@ -11,13 +11,13 @@ description = "Core orchestration loop, System 1 router, hole filler, and verifi
 workspace = true
 
 [dependencies]
-miter-engine = "0.1.0-alpha.2"
-miter-harness = "0.1.0-alpha.2"
-storypole-core = "0.1.0-beta.1"
-sawhorse-core = "0.1.0-beta.1"
-chalkline-core = "0.1.0-beta.1"
-dado-core = "0.1.0-beta.1"
-batten-core = "0.1.0-beta.1"
+miter-engine = "0.1.0-alpha.3"
+miter-harness = "0.1.0-alpha.3"
+storypole-core = "0.1.0-beta.2"
+sawhorse-core = "0.1.0-beta.2"
+chalkline-core = "0.1.0-beta.2"
+dado-core = "0.1.0-beta.2"
+batten-core = "0.1.0-beta.2"
 
 async-trait = "0.1"
 futures = "0.3"
