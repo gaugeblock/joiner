@@ -18,8 +18,8 @@ pub use engine::JoinerEngine;
 pub use error::{JoinerError, Result};
 pub use filler::{HoleFillRequest, HoleFiller};
 pub use model::{
-    AnonymizedSynthesisTrace, CompilerDiagnostic, ExecutionMode, JoinerConfig,
-    SynthesisEvent, SynthesisResult, SynthesisStrategy, TelemetryTier, VerificationReport,
+    AnonymizedSynthesisTrace, CompilerDiagnostic, ExecutionMode, JoinerConfig, SynthesisEvent,
+    SynthesisResult, SynthesisStrategy, TelemetryTier, VerificationReport,
 };
 pub use oracle::{OracleResult, OracleRunner};
 pub use router::System1Router;
@@ -31,4 +31,3 @@ pub use verifier::{AstVerifier, line_col_to_byte_offset};
 
 /// Current version of `joiner-core`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-

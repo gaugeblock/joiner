@@ -70,7 +70,9 @@ impl System1Router {
 
         // Stage 2: Ambiguous or multi-candidate — invoke sawhorse System1Router if available
         if let Some(router) = &self.role_router
-            && let Ok(strategy) = self.route_with_llm(task, lang, &query_candidates, router).await
+            && let Ok(strategy) = self
+                .route_with_llm(task, lang, &query_candidates, router)
+                .await
         {
             return Ok(strategy);
         }
@@ -99,11 +101,7 @@ impl System1Router {
         }
     }
 
-    fn find_candidates(
-        &self,
-        task: &TaskNode,
-        lang: Language,
-    ) -> Vec<&dado_core::DadoPattern> {
+    fn find_candidates(&self, task: &TaskNode, lang: Language) -> Vec<&dado_core::DadoPattern> {
         let slug_query = task.slug.replace('-', " ");
         let mut list = self.registry.list_patterns(Some(lang), Some(&task.title));
         if list.is_empty() {
@@ -153,11 +151,14 @@ impl System1Router {
         let req = InferenceRequest {
             role: ModelRole::System1Router,
             prompt,
-            system_prompt: Some("You are a deterministic AST strategy classifier. Output JSON.".into()),
+            system_prompt: Some(
+                "You are a deterministic AST strategy classifier. Output JSON.".into(),
+            ),
             grammar_constraint: None,
             grammar_format: None,
             max_tokens: 150,
             temperature: 0.0,
+            reasoning_effort: None,
         };
 
         let resp = router.complete(&req).await.map_err(JoinerError::from)?;
@@ -165,7 +166,9 @@ impl System1Router {
 
         match parsed.action.as_str() {
             "pattern" if parsed.pattern_id.is_some() => {
-                let pid = parsed.pattern_id.ok_or_else(|| JoinerError::Configuration("missing pattern_id".into()))?;
+                let pid = parsed
+                    .pattern_id
+                    .ok_or_else(|| JoinerError::Configuration("missing pattern_id".into()))?;
                 Ok(SynthesisStrategy::PatternMatch {
                     pattern_id: pid,
                     mixins: parsed.mixins.unwrap_or_default(),
@@ -176,9 +179,10 @@ impl System1Router {
                 action: parsed.directive.unwrap_or_else(|| task.title.clone()),
             }),
             _ => Ok(SynthesisStrategy::OracleFallback {
-                rationale: parsed.rationale.unwrap_or_else(|| "Router selected oracle".into()),
+                rationale: parsed
+                    .rationale
+                    .unwrap_or_else(|| "Router selected oracle".into()),
             }),
         }
     }
 }
-

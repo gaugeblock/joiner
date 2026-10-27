@@ -82,6 +82,7 @@ impl OracleRunner {
             grammar_format: None,
             max_tokens: 2048,
             temperature: 0.2,
+            reasoning_effort: None,
         };
 
         let resp = self

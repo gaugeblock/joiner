@@ -93,7 +93,10 @@ async fn test_engine_event_broadcast_and_synthesis() {
 
     let result = engine.synthesize_task(&task).await.expect("synthesize");
     assert_eq!(result.ticket_key, "GB-99");
-    assert!(matches!(result.strategy, SynthesisStrategy::SurgicalEdit { .. }));
+    assert!(matches!(
+        result.strategy,
+        SynthesisStrategy::SurgicalEdit { .. }
+    ));
 
     // Verify events were emitted
     let mut events = Vec::new();

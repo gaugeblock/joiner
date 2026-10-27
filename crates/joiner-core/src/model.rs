@@ -237,4 +237,3 @@ pub enum SynthesisEvent {
         reason: String,
     },
 }
-

@@ -135,9 +135,12 @@ impl HoleFiller {
             prompt,
             system_prompt: Some(sys_prompt),
             grammar_constraint: constraint.as_ref().map(|c| c.grammar_definition.clone()),
-            grammar_format: constraint.as_ref().map(|_| sawhorse_core::types::GrammarFormat::Gbnf),
+            grammar_format: constraint
+                .as_ref()
+                .map(|_| sawhorse_core::types::GrammarFormat::Gbnf),
             max_tokens: hole.max_tokens,
             temperature: if diagnostic.is_some() { 0.2 } else { 0.05 },
+            reasoning_effort: None,
         };
 
         // Up to 2 validation retry attempts
@@ -150,12 +153,8 @@ impl HoleFiller {
             let candidate = clean_candidate(&resp.text);
 
             if let Some(c) = &constraint {
-                let report = validate_candidate(
-                    &candidate,
-                    c,
-                    hole.allow_literals,
-                    Some(hole.max_tokens),
-                );
+                let report =
+                    validate_candidate(&candidate, c, hole.allow_literals, Some(hole.max_tokens));
                 if !report.is_valid {
                     warn!(
                         hole = %hole.hole_id,
@@ -188,5 +187,9 @@ fn clean_candidate(raw: &str) -> String {
         .strip_prefix("rust\n")
         .or_else(|| unquoted.strip_prefix("typescript\n"))
         .unwrap_or(unquoted);
-    stripped.strip_suffix("```").unwrap_or(stripped).trim().to_string()
+    stripped
+        .strip_suffix("```")
+        .unwrap_or(stripped)
+        .trim()
+        .to_string()
 }

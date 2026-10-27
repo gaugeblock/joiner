@@ -82,4 +82,3 @@ pub enum JoinerError {
     #[error("configuration error: {0}")]
     Configuration(String),
 }
-

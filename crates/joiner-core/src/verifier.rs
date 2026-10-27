@@ -187,8 +187,7 @@ impl AstVerifier {
 
         // Fallback to line-column offset mapping
         for diag in diags {
-            let offset =
-                line_col_to_byte_offset(&splice_res.rendered_code, diag.line, diag.column);
+            let offset = line_col_to_byte_offset(&splice_res.rendered_code, diag.line, diag.column);
             for (hole_id, (start, end)) in &splice_res.hole_spans {
                 if offset >= *start && offset <= *end {
                     info!(hole = %hole_id, "Attributed failure to hole via line:column");

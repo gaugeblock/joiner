@@ -137,4 +137,3 @@ fn test_telemetry_tier_roundtrip() {
         assert_eq!(tier, de);
     }
 }
-
