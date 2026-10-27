@@ -11,7 +11,7 @@ description = "Model Context Protocol (MCP) server for joiner"
 workspace = true
 
 [dependencies]
-joiner-core = { path = "../joiner-core", version = "0.1.0-beta.2" }
+joiner-core = { path = "../joiner-core", version = "0.1.0-beta.3" }
 dado-core = "0.1.0-beta.2"
 sawhorse-core = "0.1.0-beta.2"
 storypole-core = "0.1.0-beta.2"
