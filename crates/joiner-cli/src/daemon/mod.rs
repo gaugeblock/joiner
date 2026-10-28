@@ -2,8 +2,8 @@
 
 pub mod routes;
 
-use axum::routing::{get, post};
 use axum::Router;
+use axum::routing::{get, post};
 use joiner_core::JoinerEngine;
 use joiner_core::model::JoinerConfig;
 use joiner_core::telemetry::{FileSpoolSink, TelemetrySink};
@@ -34,8 +34,14 @@ pub fn build_router(state: AppState) -> Router {
     Router::new()
         .route("/api/v1/status", get(routes::get_status))
         .route("/api/v1/run-next", post(routes::post_run_next))
-        .route("/api/v1/synthesize/{task_id}", post(routes::post_synthesize))
-        .route("/api/v1/telemetry/pending", get(routes::get_pending_telemetry))
+        .route(
+            "/api/v1/synthesize/{task_id}",
+            post(routes::post_synthesize),
+        )
+        .route(
+            "/api/v1/telemetry/pending",
+            get(routes::get_pending_telemetry),
+        )
         .route("/api/v1/ws", get(routes::ws_handler))
         .route("/api/v1/events", get(routes::sse_handler))
         .layer(cors)
@@ -83,15 +89,18 @@ fn build_default_router() -> Arc<sawhorse_core::router::RoleRouter> {
         roles: Default::default(),
         timeouts: Default::default(),
     };
-    Arc::new(sawhorse_core::router::RoleRouter::from_config(cfg).unwrap_or_else(|_| {
-        match sawhorse_core::router::RoleRouter::from_config(sawhorse_core::config::SawhorseConfig {
-            providers: Default::default(),
-            roles: Default::default(),
-            timeouts: Default::default(),
-        }) {
-            Ok(r) => r,
-            Err(_) => unreachable!("Empty SawhorseConfig is infallible"),
-        }
-    }))
+    Arc::new(
+        sawhorse_core::router::RoleRouter::from_config(cfg).unwrap_or_else(|_| {
+            match sawhorse_core::router::RoleRouter::from_config(
+                sawhorse_core::config::SawhorseConfig {
+                    providers: Default::default(),
+                    roles: Default::default(),
+                    timeouts: Default::default(),
+                },
+            ) {
+                Ok(r) => r,
+                Err(_) => unreachable!("Empty SawhorseConfig is infallible"),
+            }
+        }),
+    )
 }
-

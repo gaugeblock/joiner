@@ -106,4 +106,3 @@ pub struct TelemetryArgs {
     #[arg(long, default_value_t = 100)]
     pub limit: usize,
 }
-

@@ -90,4 +90,3 @@ async fn test_daemon_status_endpoint() {
     let resp = app.oneshot(req).await.expect("oneshot call");
     assert_eq!(resp.status(), StatusCode::OK);
 }
-

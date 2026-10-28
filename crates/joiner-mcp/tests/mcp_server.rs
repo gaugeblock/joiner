@@ -21,10 +21,7 @@ async fn test_mcp_initialize() {
 async fn test_mcp_tools_list() {
     let tools = list_tools();
     assert_eq!(tools.len(), 3);
-    let names: Vec<&str> = tools
-        .iter()
-        .filter_map(|t| t["name"].as_str())
-        .collect();
+    let names: Vec<&str> = tools.iter().filter_map(|t| t["name"].as_str()).collect();
     assert!(names.contains(&"joiner_run_next"));
     assert!(names.contains(&"joiner_synthesize"));
     assert!(names.contains(&"joiner_status"));
@@ -67,4 +64,3 @@ async fn test_mcp_unknown_method() {
     let resp = handle_message(&req).await.expect("error response");
     assert_eq!(resp["error"]["code"], -32601);
 }
-

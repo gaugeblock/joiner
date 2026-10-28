@@ -89,4 +89,3 @@ fn create_fallback_router() -> sawhorse_core::router::RoleRouter {
         Err(_) => unreachable!("Empty SawhorseConfig is infallible"),
     }
 }
-

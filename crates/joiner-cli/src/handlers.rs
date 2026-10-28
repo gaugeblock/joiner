@@ -70,7 +70,9 @@ pub async fn handle_synthesize(
     let all_tasks = get_all_tasks(store.conn())?;
     let task = all_tasks
         .values()
-        .find(|t| t.ticket_key.eq_ignore_ascii_case(&args.task_id) || t.id.to_string() == args.task_id)
+        .find(|t| {
+            t.ticket_key.eq_ignore_ascii_case(&args.task_id) || t.id.to_string() == args.task_id
+        })
         .cloned()
         .ok_or_else(|| format!("Task '{}' not found", args.task_id))?;
 
@@ -132,15 +134,18 @@ fn build_default_router() -> Arc<sawhorse_core::router::RoleRouter> {
         roles: Default::default(),
         timeouts: Default::default(),
     };
-    Arc::new(sawhorse_core::router::RoleRouter::from_config(cfg).unwrap_or_else(|_| {
-        match sawhorse_core::router::RoleRouter::from_config(sawhorse_core::config::SawhorseConfig {
-            providers: Default::default(),
-            roles: Default::default(),
-            timeouts: Default::default(),
-        }) {
-            Ok(r) => r,
-            Err(_) => unreachable!("Empty SawhorseConfig is infallible"),
-        }
-    }))
+    Arc::new(
+        sawhorse_core::router::RoleRouter::from_config(cfg).unwrap_or_else(|_| {
+            match sawhorse_core::router::RoleRouter::from_config(
+                sawhorse_core::config::SawhorseConfig {
+                    providers: Default::default(),
+                    roles: Default::default(),
+                    timeouts: Default::default(),
+                },
+            ) {
+                Ok(r) => r,
+                Err(_) => unreachable!("Empty SawhorseConfig is infallible"),
+            }
+        }),
+    )
 }
-

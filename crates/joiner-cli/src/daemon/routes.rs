@@ -1,12 +1,12 @@
 //! Axum REST endpoints, WebSocket upgrade loop, and SSE streaming handlers.
 
 use super::AppState;
+use axum::Json;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
-use axum::response::sse::{Event, KeepAlive, Sse};
 use axum::response::Response;
-use axum::Json;
+use axum::response::sse::{Event, KeepAlive, Sse};
 use futures::Stream;
 use joiner_core::model::SynthesisResult;
 use joiner_core::telemetry::SpoolEntry;
@@ -15,8 +15,8 @@ use std::convert::Infallible;
 use std::time::Duration;
 use storypole_core::index::query::get_all_tasks;
 use storypole_core::store::StorypoleStore;
-use tokio_stream::wrappers::BroadcastStream;
 use tokio_stream::StreamExt;
+use tokio_stream::wrappers::BroadcastStream;
 use tracing::{error, info};
 
 /// Health and status check endpoint.
@@ -24,9 +24,18 @@ pub async fn get_status(State(state): State<AppState>) -> Json<Value> {
     let tasks_stat = match StorypoleStore::open(&state.workspace_root) {
         Ok(store) => match get_all_tasks(store.conn()) {
             Ok(tasks) => {
-                let ready = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::Ready).count();
-                let in_progress = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::InProgress).count();
-                let verified = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::Verified).count();
+                let ready = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::Ready)
+                    .count();
+                let in_progress = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::InProgress)
+                    .count();
+                let verified = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::Verified)
+                    .count();
                 json!({ "ready": ready, "in_progress": in_progress, "verified": verified, "total": tasks.len() })
             }
             Err(e) => json!({ "error": e.to_string() }),
@@ -34,11 +43,7 @@ pub async fn get_status(State(state): State<AppState>) -> Json<Value> {
         Err(e) => json!({ "uninitialized": e.to_string() }),
     };
 
-    let pending = state
-        .engine
-        .config()
-        .spool_dir
-        .join("outbox.jsonl");
+    let pending = state.engine.config().spool_dir.join("outbox.jsonl");
 
     Json(json!({
         "service": "joiner-daemon",
@@ -131,4 +136,3 @@ pub async fn sse_handler(
 
     Sse::new(stream).keep_alive(KeepAlive::new().interval(Duration::from_secs(15)))
 }
-

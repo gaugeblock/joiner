@@ -111,8 +111,7 @@ async fn handle_synthesize(args: &Value) -> Value {
     };
 
     let target_task = all_tasks.values().find(|t| {
-        t.ticket_key.eq_ignore_ascii_case(task_id_str)
-            || t.id.to_string() == task_id_str
+        t.ticket_key.eq_ignore_ascii_case(task_id_str) || t.id.to_string() == task_id_str
     });
 
     let task = match target_task {
@@ -161,9 +160,18 @@ async fn handle_status(args: &Value) -> Value {
     let storypole_status = match StorypoleStore::open(&root) {
         Ok(store) => match get_all_tasks(store.conn()) {
             Ok(tasks) => {
-                let ready = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::Ready).count();
-                let in_progress = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::InProgress).count();
-                let verified = tasks.values().filter(|t| t.status == storypole_core::model::task::TaskStatus::Verified).count();
+                let ready = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::Ready)
+                    .count();
+                let in_progress = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::InProgress)
+                    .count();
+                let verified = tasks
+                    .values()
+                    .filter(|t| t.status == storypole_core::model::task::TaskStatus::Verified)
+                    .count();
                 json!({ "ready": ready, "in_progress": in_progress, "verified": verified, "total": tasks.len() })
             }
             Err(e) => json!({ "error": e.to_string() }),
@@ -190,4 +198,3 @@ async fn handle_status(args: &Value) -> Value {
         }]
     })
 }
-
