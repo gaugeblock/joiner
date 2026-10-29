@@ -17,6 +17,7 @@ fn make_test_task(title: &str, slug: &str, labels: Vec<String>, symbols: Vec<Str
         description: "Test task".to_string(),
         kind: TaskKind::Feature,
         status: TaskStatus::Ready,
+        archived_at_epoch_ms: None,
         priority: 1,
         scope: TaskScope {
             repo: Some("gaugeblock".into()),

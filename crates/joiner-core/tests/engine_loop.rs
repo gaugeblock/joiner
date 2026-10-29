@@ -71,6 +71,7 @@ async fn test_engine_event_broadcast_and_synthesis() {
         description: "Perform surgical refactor".into(),
         kind: TaskKind::Refactor,
         status: TaskStatus::Ready,
+        archived_at_epoch_ms: None,
         priority: 1,
         scope: TaskScope {
             repo: Some("test".into()),
