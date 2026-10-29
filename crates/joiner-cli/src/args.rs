@@ -26,6 +26,9 @@ pub enum Command {
     /// Synthesize and verify code for a specific storypole task.
     Synthesize(SynthesizeArgs),
 
+    /// Fill one function and record the trace (Silver, or Gold when a repair was needed).
+    Fill(FillArgs),
+
     /// Launch HTTP/WebSocket/SSE daemon for the benchwork UI.
     Daemon(DaemonArgs),
 
@@ -105,4 +108,27 @@ pub struct TelemetryArgs {
     /// Maximum records to export.
     #[arg(long, default_value_t = 100)]
     pub limit: usize,
+}
+
+/// Arguments for `joiner fill`.
+#[derive(Debug, Args)]
+pub struct FillArgs {
+    /// File containing the code to fill.
+    pub file: std::path::PathBuf,
+
+    /// Function to replace; omit to treat the whole file as the unit.
+    #[arg(long)]
+    pub symbol: Option<String>,
+
+    /// Write the validated candidate back to the file.
+    #[arg(long)]
+    pub apply: bool,
+
+    /// Workspace root holding `.gaugeblock/` for the spool (defaults to '.').
+    #[arg(long, default_value = ".")]
+    pub dir: std::path::PathBuf,
+
+    /// Output as JSON.
+    #[arg(long)]
+    pub json: bool,
 }

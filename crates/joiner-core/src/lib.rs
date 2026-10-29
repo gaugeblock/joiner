@@ -5,9 +5,12 @@
 #![forbid(unsafe_code)]
 #![warn(missing_debug_implementations)]
 
+pub use gaugeblock_contracts;
+
 pub mod engine;
 pub mod error;
 pub mod filler;
+pub mod function_fill;
 pub mod model;
 pub mod oracle;
 pub mod router;

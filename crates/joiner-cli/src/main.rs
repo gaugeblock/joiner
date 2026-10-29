@@ -19,6 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     match args.command {
         args::Command::RunNext(cmd_args) => handlers::handle_run_next(cmd_args).await?,
         args::Command::Synthesize(cmd_args) => handlers::handle_synthesize(cmd_args).await?,
+        args::Command::Fill(cmd_args) => handlers::handle_fill(cmd_args).await?,
         args::Command::Daemon(cmd_args) => handlers::handle_daemon(cmd_args).await?,
         args::Command::Mcp => handlers::handle_mcp().await?,
         args::Command::Telemetry(cmd_args) => handlers::handle_telemetry(cmd_args).await?,

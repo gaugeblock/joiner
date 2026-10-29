@@ -1,6 +1,6 @@
 //! CLI command handlers for `joiner`.
 
-use crate::args::{DaemonArgs, RunNextArgs, SynthesizeArgs, TelemetryArgs};
+use crate::args::{DaemonArgs, FillArgs, RunNextArgs, SynthesizeArgs, TelemetryArgs};
 use crate::daemon::run_daemon;
 use joiner_core::JoinerEngine;
 use joiner_core::model::{ExecutionMode, JoinerConfig};
@@ -148,4 +148,95 @@ fn build_default_router() -> Arc<sawhorse_core::router::RoleRouter> {
             }
         }),
     )
+}
+
+/// Executes `joiner fill`: fill one function, validate it, and spool the resulting trace.
+///
+/// The trace is the point of the command. A first-attempt success is `Silver`; a success that needed
+/// the repair retry is `Gold` and carries the rejected candidate, which is what makes it a preference
+/// pair rather than a plain completion.
+pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    use joiner_core::function_fill::fill_function;
+    use joiner_core::gaugeblock_contracts::{
+        AnonymizedSynthesisTrace, Language, VerificationReport,
+    };
+    use sawhorse_core::config::SawhorseConfig;
+    use sawhorse_core::router::RoleRouter;
+    use uuid::Uuid;
+
+    let config = SawhorseConfig::discover()?;
+    let router = Arc::new(RoleRouter::from_config(config)?);
+
+    let outcome = fill_function(&router, &args.file, args.symbol.as_deref()).await?;
+
+    if args.apply {
+        let source = std::fs::read_to_string(&args.file)?;
+        let updated = match args.symbol.as_deref() {
+            Some(symbol) => {
+                let (start, end) = joiner_core::function_fill::function_range(&source, symbol)
+                    .ok_or_else(|| format!("fn {symbol} disappeared between fill and write"))?;
+                format!("{}{}{}", &source[..start], outcome.code, &source[end..])
+            }
+            None => outcome.code.clone(),
+        };
+        std::fs::write(&args.file, updated)?;
+    }
+
+    let spool_dir = args.dir.join(".gaugeblock").join("spool");
+    let sink = FileSpoolSink::new(&spool_dir).await?;
+    let passed = true;
+    let trace = AnonymizedSynthesisTrace {
+        trace_id: Uuid::new_v4(),
+        language: Language::Rust,
+        tier: outcome.tier,
+        selected_pattern_id: None,
+        anonymized_scope_signature: format!(
+            "{}::{}",
+            args.file.display(),
+            args.symbol.as_deref().unwrap_or("<file>")
+        ),
+        filled_holes: vec![(
+            args.symbol.clone().unwrap_or_else(|| "<file>".to_string()),
+            "<filled>".to_string(),
+        )],
+        rejected_attempt: outcome.rejected_attempt.clone(),
+        verification: VerificationReport {
+            ast_valid: passed,
+            typecheck_passed: passed,
+            tests_passed: None,
+            diagnostics: Vec::new(),
+            duration_ms: 0,
+        },
+        task_key: None,
+        head_commit_sha: None,
+    };
+    let entry = sink.record_trace(&trace).await?;
+
+    if args.json {
+        println!(
+            "{}",
+            serde_json::json!({
+                "tier": format!("{:?}", outcome.tier).to_lowercase(),
+                "attempts": outcome.attempts,
+                "applied": args.apply,
+                "spooled": spool_dir.join("outbox.jsonl").display().to_string(),
+                "content_hash": entry.content_hash,
+                "code": outcome.code,
+            })
+        );
+    } else {
+        println!(
+            "filled {} (tier {:?}, {} attempt(s), {})",
+            args.symbol.as_deref().unwrap_or("<file>"),
+            outcome.tier,
+            outcome.attempts,
+            if args.apply {
+                "written"
+            } else {
+                "dry run - use --apply"
+            }
+        );
+        println!("\n{}", outcome.code);
+    }
+    Ok(())
 }
