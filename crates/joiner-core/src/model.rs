@@ -97,37 +97,9 @@ pub enum TelemetryTier {
     Diamond,
 }
 
-/// Located compiler diagnostic reported during verification.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct CompilerDiagnostic {
-    /// Relative file path.
-    pub file: String,
-    /// 1-based line number.
-    pub line: usize,
-    /// 1-based column number.
-    pub column: usize,
-    /// Tool-specific error code (e.g. `E0308`).
-    pub code: Option<String>,
-    /// Error message string.
-    pub message: String,
-    /// Optional compiler suggestion.
-    pub suggestion: Option<String>,
-}
-
-/// Comprehensive outcome of verifying a synthesized file.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct VerificationReport {
-    /// Whether the synthesized source parsed into a valid AST.
-    pub ast_valid: bool,
-    /// Whether static typecheck/compilation succeeded.
-    pub typecheck_passed: bool,
-    /// Whether cargo/project unit tests passed, if executed.
-    pub tests_passed: Option<bool>,
-    /// Located diagnostics emitted by the compiler or linter.
-    pub diagnostics: Vec<CompilerDiagnostic>,
-    /// Elapsed verification duration in milliseconds.
-    pub duration_ms: u64,
-}
+// The diagnostic and verification types live in `gaugeblock-contracts` (GB-174): joiner, rabbet and
+// the contracts trace record must describe the same thing. Re-exported so existing paths keep working.
+pub use gaugeblock_contracts::{CompilerDiagnostic, VerificationReport};
 
 /// Wire contract representing an AST-anonymized synthesis run per `CONTRACTS.md`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
