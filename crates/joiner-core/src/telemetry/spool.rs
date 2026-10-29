@@ -4,7 +4,7 @@ use super::sink::{SpoolEntry, SyncStatus, TelemetrySink, compute_trace_hash};
 use crate::error::{JoinerError, Result};
 use crate::model::{AnonymizedSynthesisTrace, TelemetryTier, VerificationReport};
 use async_trait::async_trait;
-use miter_engine::Language;
+use gaugeblock_contracts::Language;
 use miter_engine::security::scrub_source_text;
 use std::path::{Path, PathBuf};
 use tokio::fs::{self, OpenOptions};

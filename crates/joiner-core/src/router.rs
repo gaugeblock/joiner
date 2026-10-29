@@ -3,7 +3,7 @@
 use crate::error::{JoinerError, Result};
 use crate::model::SynthesisStrategy;
 use dado_core::PatternRegistry;
-use miter_engine::Language;
+use gaugeblock_contracts::Language;
 use sawhorse_core::router::RoleRouter;
 use sawhorse_core::types::{InferenceRequest, ModelRole};
 use serde::Deserialize;

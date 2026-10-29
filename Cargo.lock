@@ -370,9 +370,6 @@ dependencies = [
  "thiserror 2.0.21",
  "toml",
  "tracing",
- "tree-sitter",
- "tree-sitter-rust",
- "tree-sitter-typescript",
  "uuid",
 ]
 
@@ -1045,6 +1042,7 @@ dependencies = [
  "chalkline-core",
  "dado-core",
  "futures",
+ "gaugeblock-contracts",
  "miter-engine",
  "miter-harness",
  "sawhorse-core",

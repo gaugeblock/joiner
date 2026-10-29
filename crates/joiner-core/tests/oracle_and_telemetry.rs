@@ -1,11 +1,11 @@
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 
+use gaugeblock_contracts::Language;
 use joiner_core::model::{TelemetryTier, VerificationReport};
 use joiner_core::telemetry::{
     FileSpoolSink, MemoryTelemetrySink, SyncStatus, TelemetrySink, assign_telemetry_tier,
     build_anonymized_trace, compute_trace_hash,
 };
-use miter_engine::Language;
 use tempfile::tempdir;
 
 #[test]

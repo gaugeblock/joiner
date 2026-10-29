@@ -1,6 +1,6 @@
 //! Core domain models, configuration, and telemetry contract types for `joiner`.
 
-use miter_engine::Language;
+use gaugeblock_contracts::Language;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
@@ -135,7 +135,6 @@ pub struct AnonymizedSynthesisTrace {
     /// Globally unique trace identifier.
     pub trace_id: Uuid,
     /// Programming language of the synthesized code.
-    #[serde(with = "dado_core::language_serde")]
     pub language: Language,
     /// Quality tier achieved by this synthesis run.
     pub tier: TelemetryTier,

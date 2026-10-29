@@ -1,9 +1,9 @@
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use dado_core::PatternRegistry;
+use gaugeblock_contracts::Language;
 use joiner_core::model::{ExecutionMode, JoinerConfig, SynthesisStrategy, TelemetryTier};
 use joiner_core::router::System1Router;
-use miter_engine::Language;
 use std::sync::Arc;
 use storypole_core::model::task::{TaskKind, TaskNode, TaskScope, TaskStatus};
 use uuid::Uuid;

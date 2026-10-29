@@ -2,9 +2,9 @@
 
 use dado_core::splice::{SpliceOptions, splice_pattern};
 use dado_core::{DadoPattern, TypedHole};
+use gaugeblock_contracts::Language;
 use joiner_core::model::ExecutionMode;
 use joiner_core::verifier::{AstVerifier, line_col_to_byte_offset};
-use miter_engine::Language;
 use std::collections::BTreeMap;
 use tempfile::tempdir;
 

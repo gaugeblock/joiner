@@ -11,7 +11,7 @@ use crate::telemetry::{TelemetrySink, build_anonymized_trace};
 use crate::verifier::AstVerifier;
 use batten_core::model::LexicalScope;
 use dado_core::PatternRegistry;
-use miter_engine::Language;
+use gaugeblock_contracts::Language;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Instant;
