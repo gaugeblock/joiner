@@ -3,36 +3,12 @@
 use crate::error::{JoinerError, Result};
 use crate::model::AnonymizedSynthesisTrace;
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-/// Synchronization status of a telemetry trace in the outbox.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "snake_case")]
-pub enum SyncStatus {
-    /// Awaiting transmission to rabbet hub.
-    #[default]
-    Pending,
-    /// Successfully synchronized with remote hub.
-    Synced,
-    /// Rejected by schema validator or hub deduplicator.
-    Rejected,
-}
-
-/// A serialized telemetry entry tracked in the local outbox.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SpoolEntry {
-    /// The anonymized trace payload.
-    pub trace: AnonymizedSynthesisTrace,
-    /// Deterministic SHA-256 hash of the canonical trace JSON.
-    pub content_hash: String,
-    /// Current synchronization state.
-    pub sync_status: SyncStatus,
-    /// Timestamp in epoch milliseconds when spooled.
-    pub recorded_at_ms: u64,
-}
+// The outbox record and its sync state live in `gaugeblock-contracts` (GB-182) so `storypole`,
+// `joiner` and `rabbet` read and write one format. Re-exported for every existing path.
+pub use gaugeblock_contracts::{SpoolEntry, SyncStatus};
 
 /// Pluggable telemetry sink interface for local spooling and remote hub sync.
 #[async_trait]
@@ -52,10 +28,7 @@ pub trait TelemetrySink: Send + Sync + std::fmt::Debug {
 
 /// Calculates the SHA-256 content hash of an anonymized trace.
 pub fn compute_trace_hash(trace: &AnonymizedSynthesisTrace) -> Result<String> {
-    let json = serde_json::to_vec(trace)?;
-    let mut hasher = Sha256::new();
-    hasher.update(&json);
-    Ok(format!("{:x}", hasher.finalize()))
+    SpoolEntry::hash_trace(trace).map_err(JoinerError::Json)
 }
 
 /// In-memory sink implementation for testing and ephemeral execution.

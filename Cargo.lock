@@ -596,6 +596,7 @@ version = "0.1.0-beta.1"
 dependencies = [
  "serde",
  "serde_json",
+ "sha2",
  "uuid",
 ]
 
@@ -1049,7 +1050,6 @@ dependencies = [
  "sawhorse-core",
  "serde",
  "serde_json",
- "sha2",
  "storypole-core",
  "tempfile",
  "thiserror 2.0.21",

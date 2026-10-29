@@ -1,6 +1,6 @@
 //! Local JSONL spool outbox with source scrubbing and dynamic tier assignment.
 
-use super::sink::{SpoolEntry, SyncStatus, TelemetrySink, compute_trace_hash};
+use super::sink::{SpoolEntry, SyncStatus, TelemetrySink};
 use crate::error::{JoinerError, Result};
 use crate::model::{AnonymizedSynthesisTrace, TelemetryTier, VerificationReport};
 use async_trait::async_trait;
@@ -76,16 +76,11 @@ impl FileSpoolSink {
 #[async_trait]
 impl TelemetrySink for FileSpoolSink {
     async fn record_trace(&self, trace: &AnonymizedSynthesisTrace) -> Result<SpoolEntry> {
-        let hash = compute_trace_hash(trace)?;
-        let entry = SpoolEntry {
-            trace: trace.clone(),
-            content_hash: hash,
-            sync_status: SyncStatus::Pending,
-            recorded_at_ms: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map_err(|e| JoinerError::SpoolError(e.to_string()))?
-                .as_millis() as u64,
-        };
+        let recorded_at_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| JoinerError::SpoolError(e.to_string()))?
+            .as_millis() as u64;
+        let entry = SpoolEntry::from_trace(trace.clone(), recorded_at_ms)?;
 
         let mut file = OpenOptions::new()
             .create(true)
