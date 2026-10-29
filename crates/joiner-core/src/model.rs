@@ -1,6 +1,5 @@
 //! Core domain models, configuration, and telemetry contract types for `joiner`.
 
-use gaugeblock_contracts::Language;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
@@ -83,44 +82,11 @@ pub enum SynthesisStrategy {
     },
 }
 
-/// Quality tier assigned to an anonymized synthesis trace per `CONTRACTS.md`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum TelemetryTier {
-    /// Compiled and typechecked cleanly on attempt #1 without tests.
-    Bronze,
-    /// Passed compiler checks and unit tests on attempt #1.
-    Silver,
-    /// Required self-repair retry or Oracle fallback (contains DPO preference pair).
-    Gold,
-    /// Survived unchanged in main across subsequent release commits.
-    Diamond,
-}
-
-// The diagnostic and verification types live in `gaugeblock-contracts` (GB-174): joiner, rabbet and
-// the contracts trace record must describe the same thing. Re-exported so existing paths keep working.
-pub use gaugeblock_contracts::{CompilerDiagnostic, VerificationReport};
-
-/// Wire contract representing an AST-anonymized synthesis run per `CONTRACTS.md`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AnonymizedSynthesisTrace {
-    /// Globally unique trace identifier.
-    pub trace_id: Uuid,
-    /// Programming language of the synthesized code.
-    pub language: Language,
-    /// Quality tier achieved by this synthesis run.
-    pub tier: TelemetryTier,
-    /// Selected `dado` pattern ID, if applicable.
-    pub selected_pattern_id: Option<String>,
-    /// Normalized anonymized lexical scope signature.
-    pub anonymized_scope_signature: String,
-    /// Completed hole expressions `(hole_id, anonymized_expression)`.
-    pub filled_holes: Vec<(String, String)>,
-    /// Rejected candidate attempt (populated for Gold DPO pairs).
-    pub rejected_attempt: Option<String>,
-    /// Detailed verification report.
-    pub verification: VerificationReport,
-}
+// The telemetry record lives in `gaugeblock-contracts` (GB-174), so a trace joiner writes is the same
+// Rust type storypole and rabbet read. Re-exported to keep every existing path working.
+pub use gaugeblock_contracts::{
+    AnonymizedSynthesisTrace, CompilerDiagnostic, TelemetryTier, VerificationReport,
+};
 
 /// Summary result of a completed task synthesis pass.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -53,6 +53,8 @@ pub fn build_anonymized_trace(
         filled_holes: sanitized_holes,
         rejected_attempt: sanitized_rejected,
         verification: report,
+        task_key: None,
+        head_commit_sha: None,
     }
 }
 
