@@ -1021,11 +1021,9 @@ dependencies = [
  "joiner-core",
  "joiner-mcp",
  "sawhorse-core",
- "serde",
  "serde_json",
  "storypole-core",
  "tempfile",
- "thiserror 2.0.21",
  "tokio",
  "tokio-stream",
  "tower",
@@ -1065,13 +1063,10 @@ dependencies = [
  "dado-core",
  "joiner-core",
  "sawhorse-core",
- "serde",
  "serde_json",
  "storypole-core",
- "thiserror 2.0.21",
  "tokio",
  "tracing",
- "uuid",
 ]
 
 [[package]]
