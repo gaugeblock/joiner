@@ -10,7 +10,7 @@
 
 use std::path::Path;
 
-use gaugeblock_contracts::{InferenceRequest, ModelRole, TelemetryTier};
+use gaugeblock_contracts::{InferenceRequest, ModelRole, ReasoningEffort, TelemetryTier};
 use sawhorse_core::router::RoleRouter;
 
 use crate::error::{JoinerError, Result};
@@ -144,7 +144,11 @@ fn build_request(prompt: String, max_tokens: u16) -> InferenceRequest {
         grammar_format: None,
         max_tokens,
         temperature: 0.2,
-        reasoning_effort: None,
+        // Filling a function is deterministic work, so the thinking trace is pure overhead: a
+        // reasoning model will spend the whole budget there and return no content at all, which is
+        // what emptied the Gold path at 1024 and again at 8192 on a longer prompt (GB-206, GB-212).
+        // Disabling it is the fix; the large budget is headroom for the answer, not for the thinking.
+        reasoning_effort: Some(ReasoningEffort::None),
     }
 }
 
@@ -215,6 +219,7 @@ mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
     use super::{DEFAULT_FILL_MAX_TOKENS, FillOptions, build_request};
+    use gaugeblock_contracts::ReasoningEffort;
 
     // Deliberate invariant on a constant: the budget must not regress below what a reasoning
     // model needs, and clippy flags constant assertions by design.
@@ -235,6 +240,11 @@ mod tests {
         assert_eq!(request.temperature, 0.2);
         assert!(request.system_prompt.is_some());
         assert!(request.grammar_constraint.is_none());
+        assert_eq!(
+            request.reasoning_effort,
+            Some(ReasoningEffort::None),
+            "the filler must not pay for a thinking trace (GB-212)"
+        );
     }
 
     #[test]
