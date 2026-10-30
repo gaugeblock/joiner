@@ -259,9 +259,7 @@ dependencies = [
  "serde_json",
  "storypole-core",
  "thiserror 2.0.21",
- "tokio",
  "toml",
- "tracing",
  "uuid",
 ]
 
