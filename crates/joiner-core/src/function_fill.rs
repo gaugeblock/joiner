@@ -75,60 +75,10 @@ impl Default for FillOptions {
     }
 }
 
-/// Extracts the byte range of `fn <symbol>` by brace matching.
-///
-/// A parser would be better, but the caller only needs a slice to substitute and the grammar check
-/// afterwards decides whether the result is real code.
-#[must_use]
-pub fn function_range(source: &str, symbol: &str) -> Option<(usize, usize)> {
-    let start = source.find(&format!("fn {symbol}"))?;
-    let open = source[start..].find('{')? + start;
+/// Source surgery and candidate verification, split out to respect the file-size law.
+mod prepare;
 
-    let mut depth = 0usize;
-    for (offset, ch) in source[open..].char_indices() {
-        match ch {
-            '{' => depth += 1,
-            '}' => {
-                depth -= 1;
-                if depth == 0 {
-                    return Some((start, open + offset + 1));
-                }
-            }
-            _ => {}
-        }
-    }
-    None
-}
-
-/// Drops markdown code fences, keeping the fenced body.
-#[must_use]
-pub fn strip_code_fences(text: &str) -> String {
-    let trimmed = text.trim();
-    let Some(open) = trimmed.find("```") else {
-        return trimmed.to_string();
-    };
-    let after_open = &trimmed[open + 3..];
-    let body = after_open
-        .find('\n')
-        .map_or(after_open, |newline| &after_open[newline + 1..]);
-    match body.rfind("```") {
-        Some(close) => body[..close].trim_end().to_string(),
-        None => body.trim_end().to_string(),
-    }
-}
-
-/// `Ok(())` when the source parses with zero syntax errors, otherwise the diagnostics.
-pub fn assess_rust(source: &str) -> std::result::Result<(), Vec<String>> {
-    match miter_engine::polyglot::syntax_diagnostics(source, miter_engine::polyglot::Language::Rust)
-    {
-        Ok(diagnostics) if diagnostics.is_empty() => Ok(()),
-        Ok(diagnostics) => Err(diagnostics
-            .iter()
-            .map(|d| format!("L{}:C{} {:?}", d.line, d.column, d.kind))
-            .collect()),
-        Err(error) => Err(vec![error.to_string()]),
-    }
-}
+use prepare::compiles_in_place;
 
 /// Fills `symbol` in `file`, or the whole file when no symbol is given.
 ///
@@ -147,74 +97,7 @@ pub async fn fill_function(
 ) -> Result<FillOutcome> {
     fill_function_with(router, file, symbol, FillOptions::default()).await
 }
-
-/// Restores a file when dropped, so a candidate can be compiled in place without risking the tree.
-struct RestoreGuard {
-    path: std::path::PathBuf,
-    original: String,
-    keep: bool,
-}
-
-impl Drop for RestoreGuard {
-    fn drop(&mut self) {
-        if !self.keep {
-            let _ = std::fs::write(&self.path, &self.original);
-        }
-    }
-}
-
-/// Compiles the crate at `crate_dir` with `miter verify` and returns the diagnostics if it fails.
-fn verify_in_crate(crate_dir: &std::path::Path) -> std::result::Result<(), Vec<String>> {
-    let output = std::process::Command::new("miter")
-        .arg("verify")
-        .arg("--path")
-        .arg(crate_dir)
-        .arg("--json")
-        .output()
-        .map_err(|error| vec![format!("miter verify could not run: {error}")])?;
-
-    let body = String::from_utf8_lossy(&output.stdout);
-    let parsed: Option<serde_json::Value> = serde_json::from_str(body.trim()).ok();
-    let outcome = parsed
-        .as_ref()
-        .and_then(|value| value.get("outcome"))
-        .and_then(serde_json::Value::as_str)
-        .unwrap_or_default();
-
-    if outcome == "success" {
-        return Ok(());
-    }
-
-    let message = parsed
-        .as_ref()
-        .and_then(|value| value.get("message"))
-        .and_then(serde_json::Value::as_str)
-        .map(str::to_string)
-        .unwrap_or_else(|| String::from_utf8_lossy(&output.stderr).to_string());
-    Err(vec![format!("compile: {message}")])
-}
-
-/// Writes `candidate` into `file`, compiles the crate, and restores the file unless `keep`.
-fn compiles_in_place(
-    file: &std::path::Path,
-    candidate: &str,
-    crate_dir: &std::path::Path,
-    keep: bool,
-) -> std::result::Result<(), Vec<String>> {
-    let original = std::fs::read_to_string(file).unwrap_or_default();
-    let mut guard = RestoreGuard {
-        path: file.to_path_buf(),
-        original,
-        keep: false,
-    };
-    if let Err(error) = std::fs::write(file, candidate) {
-        return Err(vec![format!("candidate could not be written: {error}")]);
-    }
-    let verdict = verify_in_crate(crate_dir);
-    guard.keep = keep && verdict.is_ok();
-    drop(guard);
-    verdict
-}
+pub use prepare::{assess_rust, function_range, strip_code_fences};
 
 /// Fills `symbol` in `file` with an explicit token budget.
 ///
@@ -318,59 +201,5 @@ pub async fn fill_function_with(
 }
 
 #[cfg(test)]
-mod tests {
-    #![allow(clippy::unwrap_used, clippy::expect_used)]
-
-    use super::{DEFAULT_FILL_MAX_TOKENS, FillOptions, VerifyMode, build_request};
-    use gaugeblock_contracts::ReasoningEffort;
-
-    // Deliberate invariant on a constant: the budget must not regress below what a reasoning
-    // model needs, and clippy flags constant assertions by design.
-    #[allow(clippy::assertions_on_constants)]
-    #[test]
-    fn test_default_budget_leaves_room_for_a_thinking_trace() {
-        assert!(
-            DEFAULT_FILL_MAX_TOKENS >= 8192,
-            "a reasoning model spends budget before emitting content (GB-206)"
-        );
-        assert_eq!(FillOptions::default().max_tokens, DEFAULT_FILL_MAX_TOKENS);
-    }
-
-    #[test]
-    fn test_the_budget_reaches_the_request_unchanged() {
-        let request = build_request("fill this".to_string(), 4096, None);
-        assert_eq!(request.max_tokens, 4096);
-        assert_eq!(request.temperature, 0.2);
-        assert!(request.system_prompt.is_some());
-        assert!(request.grammar_constraint.is_none());
-        assert_eq!(
-            request.reasoning_effort,
-            Some(ReasoningEffort::None),
-            "the filler must not pay for a thinking trace (GB-212)"
-        );
-    }
-
-    #[test]
-    fn test_syntax_is_the_default_oracle_and_a_crate_can_be_named() {
-        assert_eq!(FillOptions::default().verify, VerifyMode::Syntax);
-        assert!(
-            !FillOptions::default().apply,
-            "nothing is written unless asked"
-        );
-        let explicit = FillOptions {
-            verify: VerifyMode::Crate(std::path::PathBuf::from("/tmp/crate")),
-            ..FillOptions::default()
-        };
-        assert_ne!(explicit.verify, VerifyMode::Syntax);
-    }
-
-    #[test]
-    fn test_an_explicit_option_overrides_the_default() {
-        let options = FillOptions {
-            max_tokens: 512,
-            ..FillOptions::default()
-        };
-        assert_eq!(options.max_tokens, 512);
-        assert_ne!(options, FillOptions::default());
-    }
-}
+#[path = "function_fill_tests.rs"]
+mod tests;

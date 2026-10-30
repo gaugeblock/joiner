@@ -156,9 +156,7 @@ fn build_default_router() -> Arc<sawhorse_core::router::RoleRouter> {
 /// the repair retry is `Gold` and carries the rejected candidate, which is what makes it a preference
 /// pair rather than a plain completion.
 pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    use joiner_core::function_fill::{
-        DEFAULT_FILL_MAX_TOKENS, FillOptions, VerifyMode, fill_function_with,
-    };
+    use joiner_core::function_fill::fill_function_with;
     use joiner_core::gaugeblock_contracts::{
         AnonymizedSynthesisTrace, Language, VerificationReport,
     };
@@ -167,34 +165,10 @@ pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error
     use uuid::Uuid;
 
     let config = SawhorseConfig::discover()?;
-    // Size the request from the provider's declared limits (GB-215): the API exposes no context
-    // window, so the ceiling is configured, and the budget slides down as the prompt grows.
-    let limits = config
-        .roles
-        .get(&sawhorse_core::types::ModelRole::HoleFiller)
-        .and_then(|role| config.providers.get(&role.provider))
-        .map(sawhorse_core::config::schema::ProviderConfig::limits)
-        .unwrap_or_default();
-    let router = Arc::new(RoleRouter::from_config(config)?);
-
-    let prompt_tokens = std::fs::read_to_string(&args.file)
-        .map(|source| (source.chars().count() / 4) as u32 + 512)
-        .unwrap_or(512);
-    let max_tokens = args.max_tokens.unwrap_or_else(|| {
-        limits
-            .output_budget(prompt_tokens)
-            .unwrap_or(DEFAULT_FILL_MAX_TOKENS)
-    });
-
-    let options = FillOptions {
-        max_tokens,
-        verify: match &args.verify_crate {
-            Some(dir) => VerifyMode::Crate(dir.clone()),
-            None => VerifyMode::Syntax,
-        },
-        apply: args.apply,
-        reasoning_effort: limits.reasoning_effort,
-    };
+    // Options are sized before the router consumes the config (GB-215): declared limits become the
+    // token budget, so this must read `config` while it is still owned here.
+    let options = crate::fill_options::resolve(&config, &args);
+    let router = RoleRouter::from_config(config)?;
     let outcome = fill_function_with(&router, &args.file, args.symbol.as_deref(), options).await?;
 
     if args.apply {
