@@ -54,3 +54,56 @@ fn test_an_explicit_option_overrides_the_default() {
     assert_eq!(options.max_tokens, 512);
     assert_ne!(options, FillOptions::default());
 }
+
+#[test]
+fn test_the_prompt_names_the_available_crates() {
+    let prompt = super::prepare::build_prompt(
+        "grapheme_count",
+        "fn grapheme_count(input: &str) -> usize { todo!() }",
+        &[],
+        &["serde".to_string(), "unicode-segmentation".to_string()],
+    );
+    assert!(
+        prompt.contains(
+            "Crates this code may use (declared by the crate): serde, unicode-segmentation"
+        ),
+        "got: {prompt}"
+    );
+    assert!(prompt.contains("Do not import anything else."));
+}
+
+#[test]
+fn test_without_a_crate_the_prompt_says_nothing_about_dependencies() {
+    // An empty list must not read as "there are no crates" - syntax-only verification cannot know.
+    let prompt = super::prepare::build_prompt("f", "fn f() {}", &[], &[]);
+    assert!(
+        !prompt.contains("Crates this code may use"),
+        "got: {prompt}"
+    );
+}
+
+#[test]
+fn test_declared_dependencies_reads_the_dependency_tables_only() {
+    let dir = std::env::temp_dir().join(format!("joiner-deps-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(
+        dir.join("Cargo.toml"),
+        "[package]\nname = \"fixture\"\nversion = \"0.1.0\"\n\n[dependencies]\nserde = \"1.0\"\nregex = { version = \"1\" }\n\n[dev-dependencies]\ntempfile = \"3\"\n\n[profile.dev]\nopt-level = 0\n",
+    )
+    .unwrap();
+
+    let deps = super::prepare::declared_dependencies(&dir);
+    std::fs::remove_dir_all(&dir).ok();
+
+    assert_eq!(
+        deps,
+        vec!["regex", "serde", "tempfile"],
+        "package keys excluded, sorted"
+    );
+}
+
+#[test]
+fn test_a_missing_manifest_yields_no_dependencies_rather_than_failing() {
+    let missing = std::env::temp_dir().join("joiner-no-such-crate-dir");
+    assert!(super::prepare::declared_dependencies(&missing).is_empty());
+}

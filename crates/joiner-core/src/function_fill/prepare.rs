@@ -121,3 +121,87 @@ pub(super) fn compiles_in_place(
     drop(guard);
     verdict
 }
+
+/// Names of the dependencies declared by the crate at `dir`, sorted and deduplicated.
+///
+/// A fill that cannot see the manifest reaches for the crate that would make the code idiomatic -
+/// `unicode_segmentation` for grapheme counting - and then fails verification with an unresolved
+/// import, which no amount of retrying fixes (`GB-224`). Reading the manifest costs one file read and
+/// turns that into a prompt that names what exists.
+///
+/// Deliberately a line scan rather than a TOML parse: the only thing needed is the key set of the
+/// dependency tables, and a full parse would need a parser dependency in a crate that has none.
+pub(super) fn declared_dependencies(dir: &std::path::Path) -> Vec<String> {
+    let manifest = dir.join("Cargo.toml");
+    let Ok(text) = std::fs::read_to_string(manifest) else {
+        return Vec::new();
+    };
+
+    let mut names = Vec::new();
+    let mut in_dependencies = false;
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') {
+            in_dependencies = matches!(
+                trimmed,
+                "[dependencies]" | "[dev-dependencies]" | "[build-dependencies]"
+            );
+            continue;
+        }
+        if !in_dependencies || trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        if let Some((name, _)) = trimmed.split_once('=') {
+            let name = name.trim();
+            if !name.is_empty() && !names.iter().any(|existing| existing == name) {
+                names.push(name.to_string());
+            }
+        }
+    }
+    names.sort();
+    names
+}
+
+/// Builds the fill prompt.
+///
+/// Pure so the shape is testable without a provider. `available` is empty when the caller is not
+/// verifying inside a crate, in which case the prompt says nothing about dependencies rather than
+/// implying there are none.
+pub(super) fn build_prompt(
+    label: &str,
+    context: &str,
+    diagnostics: &[String],
+    available: &[String],
+) -> String {
+    let diagnostic_block = if diagnostics.is_empty() {
+        "none".to_string()
+    } else {
+        diagnostics.join(
+            "
+",
+        )
+    };
+    let availability = if available.is_empty() {
+        String::new()
+    } else {
+        format!(
+            "
+
+Crates this code may use (declared by the crate): {}. Do not import anything else.",
+            available.join(", ")
+        )
+    };
+    format!(
+        "Fill {label} in Rust.
+
+Current code:
+```rust
+{context}
+```{availability}
+
+Syntax diagnostics from the previous attempt:
+{diagnostic_block}
+
+Return only the complete replacement code inside one ```rust fence."
+    )
+}

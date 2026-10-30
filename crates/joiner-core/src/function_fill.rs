@@ -76,9 +76,9 @@ impl Default for FillOptions {
 }
 
 /// Source surgery and candidate verification, split out to respect the file-size law.
-mod prepare;
+pub(super) mod prepare;
 
-use prepare::compiles_in_place;
+use prepare::{build_prompt, compiles_in_place, declared_dependencies};
 
 /// Fills `symbol` in `file`, or the whole file when no symbol is given.
 ///
@@ -145,19 +145,19 @@ pub async fn fill_function_with(
         None => source.clone(),
     };
 
+    // Only meaningful when verification happens inside a crate: that is the only case where a
+    // dependency the model invents can be checked against reality (GB-224).
+    let available = match &options.verify {
+        VerifyMode::Crate(dir) => declared_dependencies(dir),
+        VerifyMode::Syntax => Vec::new(),
+    };
+
     let mut rejected: Option<String> = None;
     let mut diagnostics: Vec<String> = Vec::new();
 
     for attempt in 1..=2usize {
         let label = symbol.unwrap_or("the file");
-        let diagnostic_block = if diagnostics.is_empty() {
-            "none".to_string()
-        } else {
-            diagnostics.join("\n")
-        };
-        let prompt = format!(
-            "Fill {label} in Rust.\n\nCurrent code:\n```rust\n{context}\n```\n\nSyntax diagnostics from the previous attempt:\n{diagnostic_block}\n\nReturn only the complete replacement code inside one ```rust fence."
-        );
+        let prompt = build_prompt(label, &context, &diagnostics, &available);
 
         let request = build_request(prompt, options.max_tokens, options.reasoning_effort);
 
