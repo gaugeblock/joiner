@@ -172,12 +172,10 @@ version = "0.1.0-beta.4"
 dependencies = [
  "dado-core",
  "gaugeblock-contracts",
- "miter-engine",
  "regex",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
- "tracing",
 ]
 
 [[package]]
@@ -413,14 +411,11 @@ version = "0.1.0-beta.4"
 dependencies = [
  "chalkline-core",
  "gaugeblock-contracts",
- "miter-ast",
  "miter-engine",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
  "toml",
- "tracing",
- "uuid",
 ]
 
 [[package]]
