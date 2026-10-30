@@ -60,6 +60,8 @@ pub struct FillOptions {
     pub verify: VerifyMode,
     /// Leave the validated candidate on disk (the `--apply` contract).
     pub apply: bool,
+    /// Reasoning effort to request; defaults to disabled because filling is deterministic work.
+    pub reasoning_effort: Option<ReasoningEffort>,
 }
 
 impl Default for FillOptions {
@@ -68,6 +70,7 @@ impl Default for FillOptions {
             max_tokens: DEFAULT_FILL_MAX_TOKENS,
             verify: VerifyMode::Syntax,
             apply: false,
+            reasoning_effort: None,
         }
     }
 }
@@ -220,7 +223,11 @@ fn compiles_in_place(
 /// As [`fill_function`].
 /// Builds the hole-filler request. Pure so the token budget is testable without a provider.
 #[must_use]
-fn build_request(prompt: String, max_tokens: u16) -> InferenceRequest {
+fn build_request(
+    prompt: String,
+    max_tokens: u16,
+    effort: Option<ReasoningEffort>,
+) -> InferenceRequest {
     InferenceRequest {
         role: ModelRole::HoleFiller,
         prompt,
@@ -232,11 +239,10 @@ fn build_request(prompt: String, max_tokens: u16) -> InferenceRequest {
         grammar_format: None,
         max_tokens,
         temperature: 0.2,
-        // Filling a function is deterministic work, so the thinking trace is pure overhead: a
-        // reasoning model will spend the whole budget there and return no content at all, which is
-        // what emptied the Gold path at 1024 and again at 8192 on a longer prompt (GB-206, GB-212).
-        // Disabling it is the fix; the large budget is headroom for the answer, not for the thinking.
-        reasoning_effort: Some(ReasoningEffort::None),
+        // Disabled by default: filling is deterministic work and a thinking trace spends the budget
+        // before any content appears (GB-206, GB-212). A caller can raise it - the configured
+        // provider effort wins - which is what diagnostics work needs (GB-215).
+        reasoning_effort: Some(effort.unwrap_or(ReasoningEffort::None)),
     }
 }
 
@@ -270,7 +276,7 @@ pub async fn fill_function_with(
             "Fill {label} in Rust.\n\nCurrent code:\n```rust\n{context}\n```\n\nSyntax diagnostics from the previous attempt:\n{diagnostic_block}\n\nReturn only the complete replacement code inside one ```rust fence."
         );
 
-        let request = build_request(prompt, options.max_tokens);
+        let request = build_request(prompt, options.max_tokens, options.reasoning_effort);
 
         let response = router.complete(&request).await?;
         let candidate = strip_code_fences(&response.text);
@@ -332,7 +338,7 @@ mod tests {
 
     #[test]
     fn test_the_budget_reaches_the_request_unchanged() {
-        let request = build_request("fill this".to_string(), 4096);
+        let request = build_request("fill this".to_string(), 4096, None);
         assert_eq!(request.max_tokens, 4096);
         assert_eq!(request.temperature, 0.2);
         assert!(request.system_prompt.is_some());

@@ -25,6 +25,9 @@ fn build_test_router() -> Arc<RoleRouter> {
             dialect: None,
             headers: None,
             timeout_ms: None,
+            context_window: None,
+            max_output_tokens: None,
+            reasoning_effort: None,
         },
     );
 
