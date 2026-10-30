@@ -76,6 +76,19 @@ impl FileSpoolSink {
 #[async_trait]
 impl TelemetrySink for FileSpoolSink {
     async fn record_trace(&self, trace: &AnonymizedSynthesisTrace) -> Result<SpoolEntry> {
+        // A trace whose hole body is empty or a placeholder cannot train anything, and silently
+        // spooling one is how a corpus fills with unusable pairs (`GB-225`). Fail at the write, where
+        // the reason is still obvious.
+        if let Some((hole, _)) = trace
+            .filled_holes
+            .iter()
+            .find(|(_, body)| body.trim().is_empty() || body.trim() == "<filled>")
+        {
+            return Err(JoinerError::SpoolError(format!(
+                "hole `{hole}` has no filled body; a placeholder makes an unusable pair"
+            )));
+        }
+
         let recorded_at_ms = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_err(|e| JoinerError::SpoolError(e.to_string()))?

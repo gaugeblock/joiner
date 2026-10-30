@@ -197,9 +197,12 @@ pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error
             args.file.display(),
             args.symbol.as_deref().unwrap_or("<file>")
         ),
+        // The accepted body, not a placeholder: a DPO pair whose chosen side is `<filled>` is
+        // unusable, and rabbet stored exactly that until GB-225 (`outcome.code` was available all
+        // along - the CLI simply spooled a literal instead).
         filled_holes: vec![(
             args.symbol.clone().unwrap_or_else(|| "<file>".to_string()),
-            "<filled>".to_string(),
+            outcome.code.clone(),
         )],
         rejected_attempt: outcome.rejected_attempt.clone(),
         verification: VerificationReport {

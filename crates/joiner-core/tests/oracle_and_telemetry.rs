@@ -145,3 +145,38 @@ async fn test_memory_sink_lifecycle() {
     let after = sink.list_pending().await.expect("list");
     assert!(after.is_empty());
 }
+
+#[tokio::test]
+async fn a_placeholder_body_is_refused_rather_than_spooled() {
+    // GB-225: the shard had 2 rows whose chosen side was the literal `<filled>`, which trains
+    // nothing. The write is where the reason is still obvious, so it fails here.
+    use joiner_core::telemetry::FileSpoolSink;
+
+    let dir = std::env::temp_dir().join(format!("joiner-guard-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let spool = FileSpoolSink::new(&dir).await.expect("spool");
+
+    let report = VerificationReport {
+        ast_valid: true,
+        typecheck_passed: true,
+        tests_passed: None,
+        diagnostics: Vec::new(),
+        duration_ms: 0,
+    };
+    let trace = build_anonymized_trace(
+        gaugeblock_contracts::Language::Rust,
+        1,
+        None,
+        "scope::hole",
+        &[("hole".to_string(), "<filled>".to_string())],
+        None,
+        report,
+    );
+
+    let error = spool
+        .record_trace(&trace)
+        .await
+        .expect_err("a placeholder must not be spooled");
+    assert!(error.to_string().contains("no filled body"), "got: {error}");
+    std::fs::remove_dir_all(&dir).ok();
+}
