@@ -132,6 +132,10 @@ pub struct FillArgs {
     #[arg(long)]
     pub max_tokens: Option<u16>,
 
+    /// Compile this crate directory to accept a candidate, so a hallucinated API fails the attempt.
+    #[arg(long)]
+    pub verify_crate: Option<PathBuf>,
+
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,

@@ -37,17 +37,37 @@ pub struct FillOutcome {
 /// and can be lowered per invocation.
 pub const DEFAULT_FILL_MAX_TOKENS: u16 = 8192;
 
+/// How a candidate is accepted.
+///
+/// Syntax alone is a weak oracle: a hallucinated call parses cleanly, so nothing fails and no
+/// preference pair is ever recorded (`GB-213`). Compiler verification makes the oracle able to fail,
+/// at the cost of a build per attempt.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub enum VerifyMode {
+    /// Parse the candidate only. Fast, and the default.
+    #[default]
+    Syntax,
+    /// Parse it, then compile the containing crate with `miter verify`.
+    Crate(std::path::PathBuf),
+}
+
 /// Knobs for [`fill_function_with`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FillOptions {
     /// Maximum tokens per attempt, forwarded to the provider unchanged.
     pub max_tokens: u16,
+    /// Acceptance oracle.
+    pub verify: VerifyMode,
+    /// Leave the validated candidate on disk (the `--apply` contract).
+    pub apply: bool,
 }
 
 impl Default for FillOptions {
     fn default() -> Self {
         Self {
             max_tokens: DEFAULT_FILL_MAX_TOKENS,
+            verify: VerifyMode::Syntax,
+            apply: false,
         }
     }
 }
@@ -125,6 +145,74 @@ pub async fn fill_function(
     fill_function_with(router, file, symbol, FillOptions::default()).await
 }
 
+/// Restores a file when dropped, so a candidate can be compiled in place without risking the tree.
+struct RestoreGuard {
+    path: std::path::PathBuf,
+    original: String,
+    keep: bool,
+}
+
+impl Drop for RestoreGuard {
+    fn drop(&mut self) {
+        if !self.keep {
+            let _ = std::fs::write(&self.path, &self.original);
+        }
+    }
+}
+
+/// Compiles the crate at `crate_dir` with `miter verify` and returns the diagnostics if it fails.
+fn verify_in_crate(crate_dir: &std::path::Path) -> std::result::Result<(), Vec<String>> {
+    let output = std::process::Command::new("miter")
+        .arg("verify")
+        .arg("--path")
+        .arg(crate_dir)
+        .arg("--json")
+        .output()
+        .map_err(|error| vec![format!("miter verify could not run: {error}")])?;
+
+    let body = String::from_utf8_lossy(&output.stdout);
+    let parsed: Option<serde_json::Value> = serde_json::from_str(body.trim()).ok();
+    let outcome = parsed
+        .as_ref()
+        .and_then(|value| value.get("outcome"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default();
+
+    if outcome == "success" {
+        return Ok(());
+    }
+
+    let message = parsed
+        .as_ref()
+        .and_then(|value| value.get("message"))
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_string)
+        .unwrap_or_else(|| String::from_utf8_lossy(&output.stderr).to_string());
+    Err(vec![format!("compile: {message}")])
+}
+
+/// Writes `candidate` into `file`, compiles the crate, and restores the file unless `keep`.
+fn compiles_in_place(
+    file: &std::path::Path,
+    candidate: &str,
+    crate_dir: &std::path::Path,
+    keep: bool,
+) -> std::result::Result<(), Vec<String>> {
+    let original = std::fs::read_to_string(file).unwrap_or_default();
+    let mut guard = RestoreGuard {
+        path: file.to_path_buf(),
+        original,
+        keep: false,
+    };
+    if let Err(error) = std::fs::write(file, candidate) {
+        return Err(vec![format!("candidate could not be written: {error}")]);
+    }
+    let verdict = verify_in_crate(crate_dir);
+    guard.keep = keep && verdict.is_ok();
+    drop(guard);
+    verdict
+}
+
 /// Fills `symbol` in `file` with an explicit token budget.
 ///
 /// # Errors
@@ -187,7 +275,16 @@ pub async fn fill_function_with(
         let response = router.complete(&request).await?;
         let candidate = strip_code_fences(&response.text);
 
-        match assess_rust(&candidate) {
+        let syntax_ok = assess_rust(&candidate);
+        let verdict = match (&syntax_ok, &options.verify) {
+            (Ok(()), VerifyMode::Crate(crate_dir)) => {
+                compiles_in_place(file, &candidate, crate_dir, options.apply)
+            }
+            (Ok(()), VerifyMode::Syntax) => Ok(()),
+            (Err(diagnostics), _) => Err(diagnostics.clone()),
+        };
+
+        match verdict {
             Ok(()) => {
                 let tier = if attempt == 1 {
                     TelemetryTier::Silver
@@ -218,7 +315,7 @@ pub async fn fill_function_with(
 mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-    use super::{DEFAULT_FILL_MAX_TOKENS, FillOptions, build_request};
+    use super::{DEFAULT_FILL_MAX_TOKENS, FillOptions, VerifyMode, build_request};
     use gaugeblock_contracts::ReasoningEffort;
 
     // Deliberate invariant on a constant: the budget must not regress below what a reasoning
@@ -248,8 +345,25 @@ mod tests {
     }
 
     #[test]
+    fn test_syntax_is_the_default_oracle_and_a_crate_can_be_named() {
+        assert_eq!(FillOptions::default().verify, VerifyMode::Syntax);
+        assert!(
+            !FillOptions::default().apply,
+            "nothing is written unless asked"
+        );
+        let explicit = FillOptions {
+            verify: VerifyMode::Crate(std::path::PathBuf::from("/tmp/crate")),
+            ..FillOptions::default()
+        };
+        assert_ne!(explicit.verify, VerifyMode::Syntax);
+    }
+
+    #[test]
     fn test_an_explicit_option_overrides_the_default() {
-        let options = FillOptions { max_tokens: 512 };
+        let options = FillOptions {
+            max_tokens: 512,
+            ..FillOptions::default()
+        };
         assert_eq!(options.max_tokens, 512);
         assert_ne!(options, FillOptions::default());
     }

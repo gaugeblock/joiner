@@ -156,7 +156,9 @@ fn build_default_router() -> Arc<sawhorse_core::router::RoleRouter> {
 /// the repair retry is `Gold` and carries the rejected candidate, which is what makes it a preference
 /// pair rather than a plain completion.
 pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    use joiner_core::function_fill::{DEFAULT_FILL_MAX_TOKENS, FillOptions, fill_function_with};
+    use joiner_core::function_fill::{
+        DEFAULT_FILL_MAX_TOKENS, FillOptions, VerifyMode, fill_function_with,
+    };
     use joiner_core::gaugeblock_contracts::{
         AnonymizedSynthesisTrace, Language, VerificationReport,
     };
@@ -169,6 +171,11 @@ pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error
 
     let options = FillOptions {
         max_tokens: args.max_tokens.unwrap_or(DEFAULT_FILL_MAX_TOKENS),
+        verify: match &args.verify_crate {
+            Some(dir) => VerifyMode::Crate(dir.clone()),
+            None => VerifyMode::Syntax,
+        },
+        apply: args.apply,
     };
     let outcome = fill_function_with(&router, &args.file, args.symbol.as_deref(), options).await?;
 
