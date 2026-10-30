@@ -128,6 +128,10 @@ pub struct FillArgs {
     #[arg(long, default_value = ".")]
     pub dir: std::path::PathBuf,
 
+    /// Maximum tokens per attempt (defaults to 8192, which leaves room for a reasoning trace).
+    #[arg(long)]
+    pub max_tokens: Option<u16>,
+
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,

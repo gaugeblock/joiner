@@ -28,6 +28,30 @@ pub struct FillOutcome {
     pub attempts: u32,
 }
 
+/// Default token budget for one fill attempt.
+///
+/// Reasoning models spend budget on the thinking trace before emitting any content, so a tight
+/// budget yields an empty completion and no candidate at all - which is exactly how `joiner fill`
+/// produced nothing at 1024 tokens against a reasoning model (`GB-206`). 1024 was adequate for a
+/// plain chat model and is not adequate for a reasoning one, so the default is sized for the latter
+/// and can be lowered per invocation.
+pub const DEFAULT_FILL_MAX_TOKENS: u16 = 8192;
+
+/// Knobs for [`fill_function_with`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FillOptions {
+    /// Maximum tokens per attempt, forwarded to the provider unchanged.
+    pub max_tokens: u16,
+}
+
+impl Default for FillOptions {
+    fn default() -> Self {
+        Self {
+            max_tokens: DEFAULT_FILL_MAX_TOKENS,
+        }
+    }
+}
+
 /// Extracts the byte range of `fn <symbol>` by brace matching.
 ///
 /// A parser would be better, but the caller only needs a slice to substitute and the grammar check
@@ -98,6 +122,38 @@ pub async fn fill_function(
     file: &Path,
     symbol: Option<&str>,
 ) -> Result<FillOutcome> {
+    fill_function_with(router, file, symbol, FillOptions::default()).await
+}
+
+/// Fills `symbol` in `file` with an explicit token budget.
+///
+/// # Errors
+///
+/// As [`fill_function`].
+/// Builds the hole-filler request. Pure so the token budget is testable without a provider.
+#[must_use]
+fn build_request(prompt: String, max_tokens: u16) -> InferenceRequest {
+    InferenceRequest {
+        role: ModelRole::HoleFiller,
+        prompt,
+        system_prompt: Some(
+            "You are a precise Rust engineer. Return compiling, minimal code and nothing else."
+                .to_string(),
+        ),
+        grammar_constraint: None,
+        grammar_format: None,
+        max_tokens,
+        temperature: 0.2,
+        reasoning_effort: None,
+    }
+}
+
+pub async fn fill_function_with(
+    router: &RoleRouter,
+    file: &Path,
+    symbol: Option<&str>,
+    options: FillOptions,
+) -> Result<FillOutcome> {
     let source = std::fs::read_to_string(file)?;
     let context = match symbol {
         Some(name) => {
@@ -122,19 +178,7 @@ pub async fn fill_function(
             "Fill {label} in Rust.\n\nCurrent code:\n```rust\n{context}\n```\n\nSyntax diagnostics from the previous attempt:\n{diagnostic_block}\n\nReturn only the complete replacement code inside one ```rust fence."
         );
 
-        let request = InferenceRequest {
-            role: ModelRole::HoleFiller,
-            prompt,
-            system_prompt: Some(
-                "You are a precise Rust engineer. Return compiling, minimal code and nothing else."
-                    .to_string(),
-            ),
-            grammar_constraint: None,
-            grammar_format: None,
-            max_tokens: 1024,
-            temperature: 0.2,
-            reasoning_effort: None,
-        };
+        let request = build_request(prompt, options.max_tokens);
 
         let response = router.complete(&request).await?;
         let candidate = strip_code_fences(&response.text);
@@ -164,4 +208,39 @@ pub async fn fill_function(
         hole_id: symbol.unwrap_or("<file>").to_string(),
         reason: format!("no candidate validated: {}", diagnostics.join("; ")),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
+
+    use super::{DEFAULT_FILL_MAX_TOKENS, FillOptions, build_request};
+
+    // Deliberate invariant on a constant: the budget must not regress below what a reasoning
+    // model needs, and clippy flags constant assertions by design.
+    #[allow(clippy::assertions_on_constants)]
+    #[test]
+    fn test_default_budget_leaves_room_for_a_thinking_trace() {
+        assert!(
+            DEFAULT_FILL_MAX_TOKENS >= 8192,
+            "a reasoning model spends budget before emitting content (GB-206)"
+        );
+        assert_eq!(FillOptions::default().max_tokens, DEFAULT_FILL_MAX_TOKENS);
+    }
+
+    #[test]
+    fn test_the_budget_reaches_the_request_unchanged() {
+        let request = build_request("fill this".to_string(), 4096);
+        assert_eq!(request.max_tokens, 4096);
+        assert_eq!(request.temperature, 0.2);
+        assert!(request.system_prompt.is_some());
+        assert!(request.grammar_constraint.is_none());
+    }
+
+    #[test]
+    fn test_an_explicit_option_overrides_the_default() {
+        let options = FillOptions { max_tokens: 512 };
+        assert_eq!(options.max_tokens, 512);
+        assert_ne!(options, FillOptions::default());
+    }
 }
