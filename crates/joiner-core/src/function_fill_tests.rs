@@ -107,3 +107,31 @@ fn test_a_missing_manifest_yields_no_dependencies_rather_than_failing() {
     let missing = std::env::temp_dir().join("joiner-no-such-crate-dir");
     assert!(super::prepare::declared_dependencies(&missing).is_empty());
 }
+
+#[test]
+fn test_the_extracted_context_keeps_the_doc_comment() {
+    // GB-224's fixture explains the intended approach in its doc comment; cutting it off is what made
+    // the model reimplement the function with a crate the fixture does not have.
+    let source = "//! Crate docs.\n\npub fn other() {}\n\n/// Delegates to `crate::text`.\n///\n/// Second line.\n#[inline]\npub fn grapheme_count(input: &str) -> usize {\n    todo!()\n}\n";
+    let (start, end) = super::function_range(source, "grapheme_count").expect("range");
+    let slice = &source[start..end];
+
+    assert!(slice.contains("Delegates to `crate::text`"), "got: {slice}");
+    assert!(
+        slice.contains("Second line."),
+        "the whole block, not one line"
+    );
+    assert!(slice.contains("#[inline]"), "attributes belong to the item");
+    assert!(
+        !slice.contains("pub fn other"),
+        "stops at the previous item"
+    );
+    assert!(slice.trim_end().ends_with('}'));
+}
+
+#[test]
+fn test_a_function_without_docs_still_extracts() {
+    let source = "pub fn a() {}\n\nfn b() -> usize { 1 }\n";
+    let (start, end) = super::function_range(source, "b").expect("range");
+    assert_eq!(&source[start..end], "fn b() -> usize { 1 }");
+}

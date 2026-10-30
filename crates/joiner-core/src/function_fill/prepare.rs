@@ -5,7 +5,13 @@
 //! judging whether it parses, and compiling a candidate in place with the tree restored after.
 
 pub fn function_range(source: &str, symbol: &str) -> Option<(usize, usize)> {
-    let start = source.find(&format!("fn {symbol}"))?;
+    let found = source.find(&format!("fn {symbol}"))?;
+    // The item usually reads `pub fn ..`, so the match sits mid-line: anchor at the line start first,
+    // otherwise the backwards walk sees a partial line and gives up before reaching the doc block.
+    let line_start = source[..found]
+        .rfind('\n')
+        .map_or(0, |position| position + 1);
+    let start = extend_over_docs(source, line_start);
     let open = source[start..].find('{')? + start;
 
     let mut depth = 0usize;
@@ -22,6 +28,30 @@ pub fn function_range(source: &str, symbol: &str) -> Option<(usize, usize)> {
         }
     }
     None
+}
+
+/// Walks `start` backwards over the doc comment and attributes attached to the item.
+///
+/// A bare body is not the whole specification. `GB-224`'s fixture states the intended approach in
+/// its doc comment - "delegate to `crate::text` rather than reimplementing the segmentation" - and
+/// that line was cut off, so the model reimplemented it with a crate the fixture does not have. The
+/// doc comment is where a codebase explains itself; dropping it turns a tractable fill into a guess.
+fn extend_over_docs(source: &str, start: usize) -> usize {
+    let mut cursor = start;
+    for line in source[..start].lines().rev() {
+        let trimmed = line.trim();
+        let is_doc = trimmed.starts_with("///")
+            || trimmed.starts_with("//!")
+            || trimmed.starts_with("#[")
+            || trimmed.starts_with("/**")
+            || trimmed.starts_with('*')
+            || trimmed.ends_with("*/");
+        if !is_doc {
+            break;
+        }
+        cursor = cursor.saturating_sub(line.len() + 1);
+    }
+    cursor
 }
 
 /// Drops markdown code fences, keeping the fenced body.
