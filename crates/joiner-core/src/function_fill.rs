@@ -165,9 +165,23 @@ pub async fn fill_function_with(
         let candidate = strip_code_fences(&response.text);
 
         let syntax_ok = assess_rust(&candidate);
+        // Verify what will be applied, not the bare body. The candidate is one function; writing it
+        // as the whole file deletes every other item and every `mod` declaration, so a candidate that
+        // correctly delegates to `crate::text` failed with "cannot find `text` in the crate root"
+        // while `--apply` (which splices) would have produced a compiling file.
+        let spliced = match symbol {
+            Some(name) => match function_range(&source, name) {
+                Some((start, end)) => {
+                    format!("{}{}{}", &source[..start], candidate, &source[end..])
+                }
+                None => candidate.clone(),
+            },
+            None => candidate.clone(),
+        };
+
         let verdict = match (&syntax_ok, &options.verify) {
             (Ok(()), VerifyMode::Crate(crate_dir)) => {
-                compiles_in_place(file, &candidate, crate_dir, options.apply)
+                compiles_in_place(file, &spliced, crate_dir, options.apply)
             }
             (Ok(()), VerifyMode::Syntax) => Ok(()),
             (Err(diagnostics), _) => Err(diagnostics.clone()),
