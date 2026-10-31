@@ -32,10 +32,6 @@ pub enum JoinerError {
     #[error("batten grammar error: {0}")]
     Batten(#[from] batten_core::error::BattenError),
 
-    /// Failure parsing or compiling specs in `chalkline`.
-    #[error("chalkline error: {0}")]
-    Chalkline(#[from] chalkline_core::error::ChalklineError),
-
     /// Standard I/O error during file mutation or trace persistence.
     #[error("i/o error: {0}")]
     Io(#[from] std::io::Error),

@@ -16,7 +16,6 @@ gaugeblock-security = { path = "../../../common/crates/gaugeblock-security", ver
 miter-harness = "0.1.0-alpha.3"
 storypole-core = "0.1.0-beta.2"
 sawhorse-core = "0.1.0-beta.2"
-chalkline-core = "0.1.0-beta.2"
 gaugeblock-contracts = "0.1.0-beta.1"
 dado-core = "0.1.0-beta.2"
 batten-core = "0.1.0-beta.2"
