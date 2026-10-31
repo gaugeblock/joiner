@@ -252,10 +252,10 @@ dependencies = [
 name = "chalkline-core"
 version = "0.1.0-beta.4"
 dependencies = [
+ "gaugeblock-contracts",
  "gaugeblock-workspace",
  "miter-engine",
  "pulldown-cmark",
- "sawhorse-core",
  "serde",
  "serde_json",
  "storypole-core",
@@ -408,7 +408,6 @@ dependencies = [
 name = "dado-core"
 version = "0.1.0-beta.4"
 dependencies = [
- "chalkline-core",
  "gaugeblock-contracts",
  "miter-engine",
  "serde",
