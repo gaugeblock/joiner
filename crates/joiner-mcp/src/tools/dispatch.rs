@@ -11,22 +11,23 @@ use storypole_core::index::query::get_all_tasks;
 use storypole_core::store::StorypoleStore;
 
 /// Dispatches an incoming MCP tool invocation.
-pub async fn dispatch_tool(name: &str, args: &Value) -> Value {
+///
+/// Returns the tool's text or a failure message; the transport builds the MCP `content` envelope
+/// (`GB-234`).
+///
+/// # Errors
+///
+/// The message shown to the caller when the arguments are unusable or the tool fails.
+pub async fn dispatch_tool(name: &str, args: &Value) -> Result<String, String> {
     match name {
         "joiner_run_next" => handle_run_next(args).await,
         "joiner_synthesize" => handle_synthesize(args).await,
         "joiner_status" => handle_status(args).await,
-        other => json!({
-            "isError": true,
-            "content": [{
-                "type": "text",
-                "text": format!("Unknown tool: {other}")
-            }]
-        }),
+        other => Err(format!("Unknown tool: {other}")),
     }
 }
 
-async fn handle_run_next(args: &Value) -> Value {
+async fn handle_run_next(args: &Value) -> Result<String, String> {
     let root = args
         .get("workspace_root")
         .and_then(|v| v.as_str())
@@ -57,30 +58,16 @@ async fn handle_run_next(args: &Value) -> Value {
 
     let engine = JoinerEngine::new(config, reg, router, sink);
     match engine.run_next().await {
-        Ok(res) => json!({
-            "content": [{
-                "type": "text",
-                "text": serde_json::to_string_pretty(&res).unwrap_or_default()
-            }]
-        }),
-        Err(err) => json!({
-            "isError": true,
-            "content": [{
-                "type": "text",
-                "text": format!("joiner run-next failed: {err}")
-            }]
-        }),
+        Ok(res) => Ok(serde_json::to_string_pretty(&res).unwrap_or_default()),
+        Err(err) => Err(format!("joiner run-next failed: {err}")),
     }
 }
 
-async fn handle_synthesize(args: &Value) -> Value {
+async fn handle_synthesize(args: &Value) -> Result<String, String> {
     let task_id_str = match args.get("task_id").and_then(|v| v.as_str()) {
         Some(s) => s,
         None => {
-            return json!({
-                "isError": true,
-                "content": [{ "type": "text", "text": "Missing required argument 'task_id'" }]
-            });
+            return Err("Missing required argument 'task_id'".to_string());
         }
     };
 
@@ -93,20 +80,14 @@ async fn handle_synthesize(args: &Value) -> Value {
     let store = match StorypoleStore::open(&root) {
         Ok(s) => s,
         Err(e) => {
-            return json!({
-                "isError": true,
-                "content": [{ "type": "text", "text": format!("Failed opening storypole: {e}") }]
-            });
+            return Err(format!("Failed opening storypole: {e}"));
         }
     };
 
     let all_tasks = match get_all_tasks(store.conn()) {
         Ok(t) => t,
         Err(e) => {
-            return json!({
-                "isError": true,
-                "content": [{ "type": "text", "text": format!("Failed querying tasks: {e}") }]
-            });
+            return Err(format!("Failed querying tasks: {e}"));
         }
     };
 
@@ -117,10 +98,7 @@ async fn handle_synthesize(args: &Value) -> Value {
     let task = match target_task {
         Some(t) => t.clone(),
         None => {
-            return json!({
-                "isError": true,
-                "content": [{ "type": "text", "text": format!("Task not found: {task_id_str}") }]
-            });
+            return Err(format!("Task not found: {task_id_str}"));
         }
     };
 
@@ -134,23 +112,12 @@ async fn handle_synthesize(args: &Value) -> Value {
     let engine = JoinerEngine::new(config, reg, router, sink);
 
     match engine.synthesize_task(&task).await {
-        Ok(res) => json!({
-            "content": [{
-                "type": "text",
-                "text": serde_json::to_string_pretty(&res).unwrap_or_default()
-            }]
-        }),
-        Err(err) => json!({
-            "isError": true,
-            "content": [{
-                "type": "text",
-                "text": format!("joiner synthesize failed: {err}")
-            }]
-        }),
+        Ok(res) => Ok(serde_json::to_string_pretty(&res).unwrap_or_default()),
+        Err(err) => Err(format!("joiner synthesize failed: {err}")),
     }
 }
 
-async fn handle_status(args: &Value) -> Value {
+async fn handle_status(args: &Value) -> Result<String, String> {
     let root = args
         .get("workspace_root")
         .and_then(|v| v.as_str())
@@ -186,15 +153,11 @@ async fn handle_status(args: &Value) -> Value {
         Err(_) => 0,
     };
 
-    json!({
-        "content": [{
-            "type": "text",
-            "text": json!({
-                "service": "joiner-mcp",
-                "version": env!("CARGO_PKG_VERSION"),
-                "pending_telemetry_traces": pending_traces,
-                "storypole": storypole_status
-            }).to_string()
-        }]
+    Ok(json!({
+        "service": "joiner-mcp",
+        "version": env!("CARGO_PKG_VERSION"),
+        "pending_telemetry_traces": pending_traces,
+        "storypole": storypole_status
     })
+    .to_string())
 }

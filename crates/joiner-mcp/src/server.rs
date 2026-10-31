@@ -19,8 +19,11 @@ impl AsyncMcpHandler for JoinerHandler {
     }
 
     async fn call_tool(&self, name: &str, arguments: &Value) -> ToolOutcome {
-        // The dispatcher still builds the MCP envelope itself; `Raw` carries it through untouched.
-        ToolOutcome::Raw(tools::dispatch_tool(name, arguments).await)
+        match tools::dispatch_tool(name, arguments).await {
+            // The dispatcher formats its reports; the transport wraps them.
+            Ok(text) => ToolOutcome::Text(text),
+            Err(message) => ToolOutcome::Failed(message),
+        }
     }
 }
 
