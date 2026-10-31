@@ -184,7 +184,7 @@ pub async fn handle_fill(args: FillArgs) -> Result<(), Box<dyn std::error::Error
         std::fs::write(&args.file, updated)?;
     }
 
-    let spool_dir = args.dir.join(".gaugeblock").join("spool");
+    let spool_dir = gaugeblock_workspace::GaugeblockPaths::at(&args.dir).spool_dir();
     let sink = FileSpoolSink::new(&spool_dir).await?;
     let passed = true;
     let trace = AnonymizedSynthesisTrace {
