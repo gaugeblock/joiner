@@ -673,6 +673,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "gaugeblock-security"
+version = "0.1.0-beta.1"
+
+[[package]]
 name = "gaugeblock-workspace"
 version = "0.1.0-beta.1"
 dependencies = [
@@ -1149,6 +1153,7 @@ dependencies = [
  "dado-core",
  "futures",
  "gaugeblock-contracts",
+ "gaugeblock-security",
  "miter-engine",
  "miter-harness",
  "sawhorse-core",
@@ -1298,10 +1303,10 @@ version = "0.1.0-beta.4"
 dependencies = [
  "dockerfile-parser",
  "gaugeblock-contracts",
+ "gaugeblock-security",
  "miter-ast",
  "miter-inventory",
  "miter-polyglot",
- "miter-security",
  "miter-storage",
  "serde",
  "serde_json",
@@ -1326,13 +1331,13 @@ name = "miter-engine"
 version = "0.1.0-beta.4"
 dependencies = [
  "gaugeblock-git",
+ "gaugeblock-security",
  "gaugeblock-workspace",
  "globset",
  "miter-analysis",
  "miter-ast",
  "miter-inventory",
  "miter-polyglot",
- "miter-security",
  "miter-storage",
  "rayon",
  "redb",
@@ -1370,18 +1375,14 @@ version = "0.1.0-beta.4"
 dependencies = [
  "dockerfile-parser",
  "gaugeblock-contracts",
+ "gaugeblock-security",
  "hcl-rs",
  "miter-ast",
- "miter-security",
  "serde",
  "serde_yaml",
  "sqlparser",
  "tree-sitter",
 ]
-
-[[package]]
-name = "miter-security"
-version = "0.1.0-beta.4"
 
 [[package]]
 name = "miter-storage"

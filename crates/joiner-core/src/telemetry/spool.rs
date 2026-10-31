@@ -5,7 +5,7 @@ use crate::error::{JoinerError, Result};
 use crate::model::{AnonymizedSynthesisTrace, TelemetryTier, VerificationReport};
 use async_trait::async_trait;
 use gaugeblock_contracts::Language;
-use miter_engine::security::scrub_source_text;
+use gaugeblock_security::scrub_source_text;
 use std::path::{Path, PathBuf};
 use tokio::fs::{self, OpenOptions};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
