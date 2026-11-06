@@ -73,8 +73,7 @@ pub fn strip_code_fences(text: &str) -> String {
 
 /// `Ok(())` when the source parses with zero syntax errors, otherwise the diagnostics.
 pub fn assess_rust(source: &str) -> std::result::Result<(), Vec<String>> {
-    match miter_engine::polyglot::syntax_diagnostics(source, miter_engine::polyglot::Language::Rust)
-    {
+    match miter_polyglot::syntax::syntax_diagnostics(source, miter_polyglot::Language::Rust) {
         Ok(diagnostics) if diagnostics.is_empty() => Ok(()),
         Ok(diagnostics) => Err(diagnostics
             .iter()

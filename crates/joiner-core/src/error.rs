@@ -8,10 +8,6 @@ pub type Result<T> = std::result::Result<T, JoinerError>;
 /// Primary error enumeration covering all orchestration phases in `joiner`.
 #[derive(Debug, Error)]
 pub enum JoinerError {
-    /// Failure during AST indexing or symbol querying in `miter-engine`.
-    #[error("miter engine error: {0}")]
-    Miter(#[from] miter_engine::EngineError),
-
     /// Failure during isolated worktree or compiler verification in `miter-harness`.
     #[error("miter harness error: {0}")]
     Harness(#[from] miter_harness::HarnessError),
