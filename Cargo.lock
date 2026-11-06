@@ -652,9 +652,12 @@ version = "0.1.0-beta.1"
 name = "gaugeblock-workspace"
 version = "0.1.0-beta.1"
 dependencies = [
+ "gaugeblock-contracts",
  "gaugeblock-git",
+ "serde_json",
  "thiserror 2.0.21",
  "toml",
+ "uuid",
 ]
 
 [[package]]
@@ -1781,6 +1784,7 @@ dependencies = [
  "tokio",
  "toml",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -3035,6 +3039,10 @@ name = "gaugeblock-common"
 version = "0.1.0-beta.1"
 
 [[patch.unused]]
+name = "gaugeblock-inventory"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
 name = "miter-analysis"
 version = "0.1.0-beta.4"
 
@@ -3044,10 +3052,6 @@ version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "miter-engine"
-version = "0.1.0-beta.4"
-
-[[patch.unused]]
-name = "miter-inventory"
 version = "0.1.0-beta.4"
 
 [[patch.unused]]
