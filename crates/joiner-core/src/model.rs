@@ -35,8 +35,12 @@ pub struct JoinerConfig {
 impl JoinerConfig {
     /// Resolves default telemetry spool directory, preferring `.gaugeblock/spool` if present.
     pub fn default_spool_dir(root: &Path) -> PathBuf {
-        let gb_spool = root.join(".gaugeblock").join("spool");
-        if gb_spool.is_dir() || root.join(".gaugeblock").is_dir() {
+        // `spool_dir()` states the layout once (`GB-304`). The condition is unchanged - a repository
+        // with a `.gaugeblock` but no spool still gets the canonical path, so the spool is created
+        // where the suite expects it rather than in a legacy location.
+        let paths = gaugeblock_workspace::GaugeblockPaths::at(root);
+        let gb_spool = paths.spool_dir();
+        if gb_spool.is_dir() || paths.root().is_dir() {
             gb_spool
         } else {
             root.join(".rabbet").join("spool")

@@ -11,6 +11,7 @@ description = "Core orchestration loop, System 1 router, hole filler, and verifi
 workspace = true
 
 [dependencies]
+gaugeblock-workspace = "0.1.0-beta.1"
 miter-polyglot = "0.1.0-beta.4"
 gaugeblock-security = { path = "../../../common/crates/gaugeblock-security", version = "0.1.0-beta.1" }
 miter-harness = "0.1.0-alpha.3"

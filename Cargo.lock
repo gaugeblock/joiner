@@ -383,6 +383,7 @@ version = "0.1.0-beta.4"
 dependencies = [
  "gaugeblock-contracts",
  "gaugeblock-syntax",
+ "gaugeblock-workspace",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
@@ -1117,6 +1118,7 @@ dependencies = [
  "futures",
  "gaugeblock-contracts",
  "gaugeblock-security",
+ "gaugeblock-workspace",
  "miter-harness",
  "miter-polyglot",
  "sawhorse-core",
