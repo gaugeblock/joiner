@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/badge/version-0.1.0--beta.3-blue.svg)](https://gaugeblock.dev)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![gaugeblock](https://img.shields.io/badge/suite-gaugeblock-orange.svg)](https://github.com/gaugeblock)
-[![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](ARCHITECTURE.md)
+[![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](docs/ARCHITECTURE.md)
 
 Part of the **[`gaugeblock`](https://gaugeblock.dev)** neurosymbolic code synthesis ecosystem.
 
@@ -127,12 +127,12 @@ joiner telemetry --export --limit 50
 
 `joiner` adheres strictly to the canonical 9-Document Architecture:
 * **[`README.md`](./README.md):** Public elevator pitch, CLI reference, and quickstart.
-* **[`CONTRIBUTING.md`](./CONTRIBUTING.md):** Developer environment setup, Rust 2024 toolchain, and test execution.
-* **[`PRODUCT.md`](./PRODUCT.md):** User personas, JTBD, closed-loop verification metrics, and problem statements.
-* **[`ARCHITECTURE.md`](./ARCHITECTURE.md):** Subsystem topologies, synthesis pipelines, and crate boundaries.
-* **[`SPEC.md`](./SPEC.md):** Formal synthesis invariants, repair lifecycles, and type contracts.
-* **[`DESIGN.md`](./DESIGN.md):** Architectural Decision Records (ADRs) and trade-off rationales.
-* **[`ROADMAP.md`](./ROADMAP.md):** Strategic milestones, active beta capabilities, and horizons.
+* **[`CONTRIBUTING.md`](docs/CONTRIBUTING.md):** Developer environment setup, Rust 2024 toolchain, and test execution.
+* **[`PRODUCT.md`](docs/PRODUCT.md):** User personas, JTBD, closed-loop verification metrics, and problem statements.
+* **[`ARCHITECTURE.md`](docs/ARCHITECTURE.md):** Subsystem topologies, synthesis pipelines, and crate boundaries.
+* **[`SPEC.md`](docs/SPEC.md):** Formal synthesis invariants, repair lifecycles, and type contracts.
+* **[`DESIGN.md`](docs/DESIGN.md):** Architectural Decision Records (ADRs) and trade-off rationales.
+* **[`ROADMAP.md`](docs/ROADMAP.md):** Strategic milestones, active beta capabilities, and horizons.
 * **[`CHANGELOG.md`](./CHANGELOG.md):** Chronological historical release logs and unreleased entries.
 * **[`AGENTS.md`](./AGENTS.md):** Non-negotiable engineering directives, 250-line file ceiling, and verification matrix.
 
