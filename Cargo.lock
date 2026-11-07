@@ -382,7 +382,7 @@ name = "dado-core"
 version = "0.1.0-beta.4"
 dependencies = [
  "gaugeblock-contracts",
- "miter-polyglot",
+ "gaugeblock-syntax",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
@@ -647,6 +647,17 @@ dependencies = [
 [[package]]
 name = "gaugeblock-security"
 version = "0.1.0-beta.1"
+
+[[package]]
+name = "gaugeblock-syntax"
+version = "0.1.0-beta.1"
+dependencies = [
+ "gaugeblock-contracts",
+ "tree-sitter",
+ "tree-sitter-python",
+ "tree-sitter-rust",
+ "tree-sitter-typescript",
+]
 
 [[package]]
 name = "gaugeblock-workspace"
