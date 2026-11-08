@@ -107,6 +107,8 @@ impl JoinerEngine {
             base_commit_sha: None,
             head_commit_sha: None,
             commit_shas: Vec::new(),
+            repo: None,
+            chain_key: None,
         };
 
         verify_task(&mut store, task.id, Some(receipt), false, false)?;
