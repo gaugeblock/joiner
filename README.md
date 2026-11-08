@@ -127,7 +127,7 @@ joiner telemetry --export --limit 50
 
 `joiner` adheres strictly to the canonical 9-Document Architecture:
 * **[`README.md`](./README.md):** Public elevator pitch, CLI reference, and quickstart.
-* **[`CONTRIBUTING.md`](docs/CONTRIBUTING.md):** Developer environment setup, Rust 2024 toolchain, and test execution.
+* **[`CONTRIBUTING.md`](CONTRIBUTING.md):** Developer environment setup, Rust 2024 toolchain, and test execution.
 * **[`PRODUCT.md`](docs/PRODUCT.md):** User personas, JTBD, closed-loop verification metrics, and problem statements.
 * **[`ARCHITECTURE.md`](docs/ARCHITECTURE.md):** Subsystem topologies, synthesis pipelines, and crate boundaries.
 * **[`SPEC.md`](docs/SPEC.md):** Formal synthesis invariants, repair lifecycles, and type contracts.
