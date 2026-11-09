@@ -9,7 +9,9 @@ use tracing_subscriber::EnvFilter;
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // One span per invocation, so the panel can answer what the suite did rather than only what inference
     // cost (`GB-339`). Opened before any work and closed with the outcome; it cannot fail the command.
-    let invocation = gaugeblock_workspace::InvocationSpan::start("joiner", None);
+    // The subcommand is the operation a panel groups by: an executable is not a job.
+    let command = std::env::args().nth(1).filter(|arg| !arg.starts_with('-'));
+    let invocation = gaugeblock_workspace::InvocationSpan::start("joiner", command.as_deref());
 
     let args = args::CliArgs::parse();
 
