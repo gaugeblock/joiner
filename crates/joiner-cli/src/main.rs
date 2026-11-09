@@ -7,6 +7,10 @@ use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // One span per invocation, so the panel can answer what the suite did rather than only what inference
+    // cost (`GB-339`). Opened before any work and closed with the outcome; it cannot fail the command.
+    let invocation = gaugeblock_workspace::InvocationSpan::start("joiner", None);
+
     let args = args::CliArgs::parse();
 
     // Direct all structured logs to stderr so stdout remains JSON-clean
@@ -25,5 +29,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         args::Command::Telemetry(cmd_args) => handlers::handle_telemetry(cmd_args).await?,
     }
 
+    invocation.finish(true);
     Ok(())
 }
