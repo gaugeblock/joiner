@@ -1,0 +1,279 @@
+{
+  "ticket": {
+    "id": "13a13060-d732-4272-a610-5285477f7021",
+    "ticket_key": "GB-165",
+    "slug": "live-synthesis-capture-spool-root-post-verify-hook-and-the-dado-joiner-dogfooding-protocol-13a130",
+    "title": "Live synthesis capture: spool root, post-verify hook and the dado/joiner dogfooding protocol",
+    "description": "Live-capture half of the synthesis dogfooding plan, pulled ahead of GB-161 so that GB-161..GB-164 actually emit traces while being built. Measured starting state: no .gaugeblock/spool directory exists anywhere in the harness, so nothing has ever accumulated; the writer exists (SpoolSink::new spools to <spool_dir>/outbox.jsonl, with scrubbing and dynamic tier assignment) but no daily workflow constructs it; trace tiers exist in joiner model.rs and rabbet tests. Scope: create the spool root, hook post-verify capture so that a successful storypole verify or outfeed gate extracts the functions changed in base..head (miter impact gives the symbol set) and appends Silver SFT records, and record a dogfooding protocol (dado contract for the new deps wire types, dado render plus batten validate for batches, joiner only where it is usable). BLOCKING UNKNOWN found while probing: joiner synthesize is task-level only (joiner synthesize <TASK_ID> with --dir, --sandbox, --json - no provider flag, no function-level hole filling), so using joiner on one or two functions per task needs either a new fill mode or a decision to dogfood dado plus batten only. Also needs a decision on provider configuration for the LLM half.",
+    "kind": "feature",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "joiner-core",
+      "module_path": null,
+      "target_files": [
+        ".gaugeblock/spool,joiner/crates/joiner-core/src/telemetry/spool.rs,outfeed/crates/outfeed-core/src"
+      ],
+      "target_symbols": [
+        "joiner_core::telemetry::spool::SpoolSink"
+      ],
+      "labels": []
+    },
+    "edges": [
+      {
+        "kind": "blocked_by",
+        "target_id": "79d32e88-4c03-492f-8c61-fb674105b150",
+        "target_ticket_key": "GB-168"
+      }
+    ],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": {
+      "summary": "storypole verify is the sole owner of post-task capture; traces reuse the contracts schema and are idempotent per (task_key, head_commit_sha)",
+      "design_markdown": "# Task Plan: GB-165 — Live Deterministic Trace Capture\n\n> **Key:** `GB-165` **Scope:** `storypole` (owner), `common` (schema), `joiner` (consumer) **Status:** Slice 1 done\n\n## 1. Decisions (settled, do not relitigate)\n\n**`storypole verify <KEY>` is the single owner of post-task capture.** `outfeed gate` is a\n*stateless, repeatable* check run many times mid-branch; emitting there would write duplicate\nintermediate traces before a task is finished. `verify` is the one state transition where\n`base_commit_sha`, `head_commit_sha`, `commit_shas` and the task context are known and immutable.\n\n**Idempotency key: `(task_key, head_commit_sha)`.** One trace per verified head, even if `verify` is\nre-run. A re-run with a new head is a new trace.\n\n**No storypole → joiner Cargo edge.** Trace capture must not create a dependency cycle. The record\ntype already exists in `joiner-core` (`AnonymizedSynthesisTrace`, `TelemetryTier::{Bronze,Silver,Gold}`,\n`assign_telemetry_tier`), so **move those two types into `gaugeblock-contracts`** and have both\nstorypole and joiner use them. Inventing a second schema on the storypole side is the drift that\n`GB-148` was made of.\n\n## 2. Slices\n\n1. **`.gitignore` for derived state — done** (`harness/feat-live-trace-capture`). Six derived paths\n   ignored, three canonical paths still tracked, verified with `git check-ignore` both ways.\n2. **Schema move** into `gaugeblock-contracts`; `joiner-core` re-exports so its paths keep working.\n3. **Spool writer in `storypole-core`**: append one JSONL line to\n   `<canonical .gaugeblock>/spool/outbox.jsonl`, creating the directory; scrubbed via the same rules\n   joiner applies; returns the record so the caller can log it.\n4. **Hook in `verify_task`**: after the receipt is recorded, extract the functions added in\n   `base..head` (git diff + miter symbol lookup), emit one Silver trace per function, and degrade to\n   a `[skip]` warning when `miter` is absent rather than failing verification.\n5. **Dogfood protocol** codified in `AGENTS.md`: `dado contract` for new wire types,\n   `dado render` + `batten validate` for batches.\n\n## 3. Acceptance\n\n* Verifying `GB-165` itself writes the first live Silver trace to `.gaugeblock/spool/outbox.jsonl`.\n* A second `verify` on the same head writes nothing (idempotency).\n* Traces contain no secrets: `CLINE_API_KEY` and friends never appear in a record.\n",
+      "steps": [
+        {
+          "step_id": "1",
+          "title": "Ignore derived .gaugeblock runtime state",
+          "target_files": [],
+          "verification_gate": "git check-ignore ignores six derived paths and tracks three canonical ones",
+          "completed": false
+        },
+        {
+          "step_id": "2",
+          "title": "Move AnonymizedSynthesisTrace and TelemetryTier into gaugeblock-contracts",
+          "target_files": [],
+          "verification_gate": "joiner-core re-exports keep working and storypole gains no joiner dependency",
+          "completed": false
+        },
+        {
+          "step_id": "3",
+          "title": "Append scrubbed Silver traces from storypole-core to the canonical spool",
+          "target_files": [],
+          "verification_gate": "outbox.jsonl is created and one record is written per changed function",
+          "completed": false
+        },
+        {
+          "step_id": "4",
+          "title": "Hook capture into verify_task with graceful degradation",
+          "target_files": [],
+          "verification_gate": "verifying GB-165 writes our first live trace and a re-verify writes none",
+          "completed": false
+        }
+      ],
+      "plan_file_path": ".gaugeblock/storypole/plans/GB-165.md",
+      "updated_at_epoch_ms": 1793254316344
+    },
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "cline",
+      "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "Idempotency check: re-verifying the same head must not append a second trace.",
+      "verified_at_epoch_ms": 1793300988910,
+      "git_branch": "main",
+      "base_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+      "head_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+      "commit_shas": [
+        "9d5f83fdc3305312d2e84d6b56378f318daa22aa"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793251320982,
+    "updated_at_epoch_ms": 1794038012421,
+    "archived_at_epoch_ms": 1794038012421
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "13a13060-d732-4272-a610-5285477f7021",
+        "ticket_key": "GB-165",
+        "slug": "live-synthesis-capture-spool-root-post-verify-hook-and-the-dado-joiner-dogfooding-protocol-13a130",
+        "title": "Live synthesis capture: spool root, post-verify hook and the dado/joiner dogfooding protocol",
+        "description": "Live-capture half of the synthesis dogfooding plan, pulled ahead of GB-161 so that GB-161..GB-164 actually emit traces while being built. Measured starting state: no .gaugeblock/spool directory exists anywhere in the harness, so nothing has ever accumulated; the writer exists (SpoolSink::new spools to <spool_dir>/outbox.jsonl, with scrubbing and dynamic tier assignment) but no daily workflow constructs it; trace tiers exist in joiner model.rs and rabbet tests. Scope: create the spool root, hook post-verify capture so that a successful storypole verify or outfeed gate extracts the functions changed in base..head (miter impact gives the symbol set) and appends Silver SFT records, and record a dogfooding protocol (dado contract for the new deps wire types, dado render plus batten validate for batches, joiner only where it is usable). BLOCKING UNKNOWN found while probing: joiner synthesize is task-level only (joiner synthesize <TASK_ID> with --dir, --sandbox, --json - no provider flag, no function-level hole filling), so using joiner on one or two functions per task needs either a new fill mode or a decision to dogfood dado plus batten only. Also needs a decision on provider configuration for the LLM half.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "joiner-core",
+          "module_path": null,
+          "target_files": [
+            ".gaugeblock/spool,joiner/crates/joiner-core/src/telemetry/spool.rs,outfeed/crates/outfeed-core/src"
+          ],
+          "target_symbols": [
+            "joiner_core::telemetry::spool::SpoolSink"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793251320982,
+        "updated_at_epoch_ms": 1793251320982
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "edge_added",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "edge": {
+        "kind": "blocked_by",
+        "target_id": "79d32e88-4c03-492f-8c61-fb674105b150",
+        "target_ticket_key": "GB-168"
+      },
+      "timestamp_ms": 1793252048127
+    },
+    {
+      "event": "status_changed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "from": "deferred",
+      "to": "blocked",
+      "reason": "Blocked by unverified task GB-168",
+      "timestamp_ms": 1793252048127
+    },
+    {
+      "event": "status_changed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "from": "blocked",
+      "to": "ready",
+      "reason": "Dependency GB-168 verified",
+      "timestamp_ms": 1793253574753
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "claim": {
+        "agent_id": "cline",
+        "claimed_at_epoch_ms": 1793254282956,
+        "lease_expires_at_epoch_ms": 1793257882956,
+        "git_branch": "feat/live-trace-capture",
+        "base_commit_sha": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "from": "ready",
+      "to": "in_progress",
+      "reason": "Claimed by cline",
+      "timestamp_ms": 1793254282956
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "plan": {
+        "summary": "storypole verify is the sole owner of post-task capture; traces reuse the contracts schema and are idempotent per (task_key, head_commit_sha)",
+        "design_markdown": "# Task Plan: GB-165 — Live Deterministic Trace Capture\n\n> **Key:** `GB-165` **Scope:** `storypole` (owner), `common` (schema), `joiner` (consumer) **Status:** Slice 1 done\n\n## 1. Decisions (settled, do not relitigate)\n\n**`storypole verify <KEY>` is the single owner of post-task capture.** `outfeed gate` is a\n*stateless, repeatable* check run many times mid-branch; emitting there would write duplicate\nintermediate traces before a task is finished. `verify` is the one state transition where\n`base_commit_sha`, `head_commit_sha`, `commit_shas` and the task context are known and immutable.\n\n**Idempotency key: `(task_key, head_commit_sha)`.** One trace per verified head, even if `verify` is\nre-run. A re-run with a new head is a new trace.\n\n**No storypole → joiner Cargo edge.** Trace capture must not create a dependency cycle. The record\ntype already exists in `joiner-core` (`AnonymizedSynthesisTrace`, `TelemetryTier::{Bronze,Silver,Gold}`,\n`assign_telemetry_tier`), so **move those two types into `gaugeblock-contracts`** and have both\nstorypole and joiner use them. Inventing a second schema on the storypole side is the drift that\n`GB-148` was made of.\n\n## 2. Slices\n\n1. **`.gitignore` for derived state — done** (`harness/feat-live-trace-capture`). Six derived paths\n   ignored, three canonical paths still tracked, verified with `git check-ignore` both ways.\n2. **Schema move** into `gaugeblock-contracts`; `joiner-core` re-exports so its paths keep working.\n3. **Spool writer in `storypole-core`**: append one JSONL line to\n   `<canonical .gaugeblock>/spool/outbox.jsonl`, creating the directory; scrubbed via the same rules\n   joiner applies; returns the record so the caller can log it.\n4. **Hook in `verify_task`**: after the receipt is recorded, extract the functions added in\n   `base..head` (git diff + miter symbol lookup), emit one Silver trace per function, and degrade to\n   a `[skip]` warning when `miter` is absent rather than failing verification.\n5. **Dogfood protocol** codified in `AGENTS.md`: `dado contract` for new wire types,\n   `dado render` + `batten validate` for batches.\n\n## 3. Acceptance\n\n* Verifying `GB-165` itself writes the first live Silver trace to `.gaugeblock/spool/outbox.jsonl`.\n* A second `verify` on the same head writes nothing (idempotency).\n* Traces contain no secrets: `CLINE_API_KEY` and friends never appear in a record.\n",
+        "steps": [
+          {
+            "step_id": "1",
+            "title": "Ignore derived .gaugeblock runtime state",
+            "target_files": [],
+            "verification_gate": "git check-ignore ignores six derived paths and tracks three canonical ones",
+            "completed": false
+          },
+          {
+            "step_id": "2",
+            "title": "Move AnonymizedSynthesisTrace and TelemetryTier into gaugeblock-contracts",
+            "target_files": [],
+            "verification_gate": "joiner-core re-exports keep working and storypole gains no joiner dependency",
+            "completed": false
+          },
+          {
+            "step_id": "3",
+            "title": "Append scrubbed Silver traces from storypole-core to the canonical spool",
+            "target_files": [],
+            "verification_gate": "outbox.jsonl is created and one record is written per changed function",
+            "completed": false
+          },
+          {
+            "step_id": "4",
+            "title": "Hook capture into verify_task with graceful degradation",
+            "target_files": [],
+            "verification_gate": "verifying GB-165 writes our first live trace and a re-verify writes none",
+            "completed": false
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-165.md",
+        "updated_at_epoch_ms": 1793254316344
+      },
+      "timestamp_ms": 1793254316344
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "claim": {
+        "agent_id": "cline",
+        "claimed_at_epoch_ms": 1793300442156,
+        "lease_expires_at_epoch_ms": 1793304042156,
+        "git_branch": "feat/live-trace-capture",
+        "base_commit_sha": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "receipt": {
+        "verifier": "cline",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Closed on storypole main at 0e7dde4, developed on feat/live-trace-capture. Trace capture is owned by storypole verify, the one transition where base and head commits, receipt and task context are all known; outfeed gate deliberately does not write traces because it is a repeatable mid-branch check. telemetry::spool_path resolves <canonical .gaugeblock>/spool/outbox.jsonl, append_trace appends one JSONL record unless (task_key, head_commit_sha) is already present so re-verifying the same head is a no-op, traces without provenance keys are never deduplicated and corrupt lines are skipped rather than fatal. The record is the shared gaugeblock_contracts::AnonymizedSynthesisTrace at tier Silver, carrying the ticket key, the verified head, scope symbols as filled holes and a report derived from the receipt; per-function splitting needs miter and stays out of this slice. Tests: four spool tests plus an acceptance test that builds a real git repo, verifies a task, asserts one Silver trace naming the ticket and head, then re-verifies and asserts the count stays at one. Gates: fmt clean, clippy -D warnings clean, nextest 41/41.",
+        "verified_at_epoch_ms": 1793300978365,
+        "git_branch": "main",
+        "base_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+        "head_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+        "commit_shas": [
+          "9d5f83fdc3305312d2e84d6b56378f318daa22aa"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "receipt": {
+        "verifier": "cline",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Idempotency check: re-verifying the same head must not append a second trace.",
+        "verified_at_epoch_ms": 1793300988910,
+        "git_branch": "main",
+        "base_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+        "head_commit_sha": "9d5f83fdc3305312d2e84d6b56378f318daa22aa",
+        "commit_shas": [
+          "9d5f83fdc3305312d2e84d6b56378f318daa22aa"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793953174116
+    },
+    {
+      "event": "task_archived",
+      "task_id": "13a13060-d732-4272-a610-5285477f7021",
+      "status": "verified",
+      "timestamp_ms": 1794038012421
+    }
+  ]
+}

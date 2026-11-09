@@ -1,0 +1,152 @@
+{
+  "ticket": {
+    "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+    "ticket_key": "GB-213",
+    "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+    "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
+    "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+    "kind": "feature",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "joiner-core",
+      "module_path": null,
+      "target_files": [
+        "joiner/crates/joiner-core/src/function_fill.rs",
+        "joiner/crates/joiner-core/src/oracle.rs"
+      ],
+      "target_symbols": [],
+      "labels": []
+    },
+    "edges": [
+      {
+        "kind": "discovered_from",
+        "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
+      },
+      {
+        "kind": "blocked_by",
+        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
+        "target_ticket_key": "GB-214"
+      }
+    ],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "cargo-nextest",
+      "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+      "verified_at_epoch_ms": 1793360271049,
+      "git_branch": "main",
+      "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+      "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+      "commit_shas": [
+        "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793359253366,
+    "updated_at_epoch_ms": 1794038018258,
+    "archived_at_epoch_ms": 1794038018258
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+        "ticket_key": "GB-213",
+        "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+        "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
+        "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "joiner-core",
+          "module_path": null,
+          "target_files": [
+            "joiner/crates/joiner-core/src/function_fill.rs",
+            "joiner/crates/joiner-core/src/oracle.rs"
+          ],
+          "target_symbols": [],
+          "labels": []
+        },
+        "edges": [
+          {
+            "kind": "discovered_from",
+            "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
+          }
+        ],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793359253366,
+        "updated_at_epoch_ms": 1793359253366
+      },
+      "captured_by_agent": "user",
+      "discovered_from_task_id": "fd096035-84f9-45a2-9562-5b4112406305"
+    },
+    {
+      "event": "edge_added",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "edge": {
+        "kind": "blocked_by",
+        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
+        "target_ticket_key": "GB-214"
+      },
+      "timestamp_ms": 1793360270867
+    },
+    {
+      "event": "status_changed",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "from": "deferred",
+      "to": "blocked",
+      "reason": "Blocked by unverified task GB-214",
+      "timestamp_ms": 1793360270867
+    },
+    {
+      "event": "task_verified",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "receipt": {
+        "verifier": "cargo-nextest",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+        "verified_at_epoch_ms": 1793360271049,
+        "git_branch": "main",
+        "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "commit_shas": [
+          "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793953245565
+    },
+    {
+      "event": "task_archived",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "status": "verified",
+      "timestamp_ms": 1794038018258
+    }
+  ]
+}

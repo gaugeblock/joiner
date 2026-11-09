@@ -1,0 +1,137 @@
+{
+  "ticket": {
+    "id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+    "ticket_key": "GB-167",
+    "slug": "joiner-fill-granular-function-synthesis-with-silver-and-gold-dpo-capture-36baf6",
+    "title": "joiner fill: granular function synthesis with Silver and Gold DPO capture",
+    "description": "Granular hole and function synthesis, so the loop can produce Gold DPO pairs once this lands. Credentials are already live: CLINE_API_KEY in .gaugeblock/.env and [sawhorse.providers.universal] in .gaugeblock/config.toml with ClinePass DeepSeek V4.1 Flash 1017 active, so nothing here waits on an endpoint. Adds joiner fill <file> [--symbol <name>]: resolve the function via miter, request a candidate fill from sawhorse with LexicalScope context, gate it through batten validate, and emit a Silver trace on first-pass success or a Gold preference pair on a corrected retry (rejected = raw attempt, chosen = verified fix) through SpoolSink. Provider, model and key MUST come from the unified .gaugeblock/config.toml [sawhorse.default_model] and role overrides - no joiner-only credential flags and no second credential store. Size estimate: 150-220 LOC of production code plus roughly 60-80 lines of tests, because sawhorse, batten validation and the spool already exist; the new work is argument handling, one sawhorse call, one validate call and the pair-recording branch.",
+    "kind": "feature",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "joiner-cli",
+      "module_path": null,
+      "target_files": [
+        "joiner/crates/joiner-cli/src,joiner/crates/joiner-core/src/telemetry/spool.rs"
+      ],
+      "target_symbols": [
+        "joiner_core::telemetry::spool::SpoolSink"
+      ],
+      "labels": []
+    },
+    "edges": [
+      {
+        "kind": "related_to",
+        "target_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
+        "target_ticket_key": "GB-161"
+      }
+    ],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "cline",
+      "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as GB-182 because rabbet cannot ingest the bare form.",
+      "verified_at_epoch_ms": 1793302181005,
+      "git_branch": "main",
+      "base_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
+      "head_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
+      "commit_shas": [
+        "f9a516b32686f1a56765d95bd7819760c0a5f01c"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793252021819,
+    "updated_at_epoch_ms": 1794038012745,
+    "archived_at_epoch_ms": 1794038012745
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+        "ticket_key": "GB-167",
+        "slug": "joiner-fill-granular-function-synthesis-with-silver-and-gold-dpo-capture-36baf6",
+        "title": "joiner fill: granular function synthesis with Silver and Gold DPO capture",
+        "description": "Granular hole and function synthesis, so the loop can produce Gold DPO pairs once this lands. Credentials are already live: CLINE_API_KEY in .gaugeblock/.env and [sawhorse.providers.universal] in .gaugeblock/config.toml with ClinePass DeepSeek V4.1 Flash 1017 active, so nothing here waits on an endpoint. Adds joiner fill <file> [--symbol <name>]: resolve the function via miter, request a candidate fill from sawhorse with LexicalScope context, gate it through batten validate, and emit a Silver trace on first-pass success or a Gold preference pair on a corrected retry (rejected = raw attempt, chosen = verified fix) through SpoolSink. Provider, model and key MUST come from the unified .gaugeblock/config.toml [sawhorse.default_model] and role overrides - no joiner-only credential flags and no second credential store. Size estimate: 150-220 LOC of production code plus roughly 60-80 lines of tests, because sawhorse, batten validation and the spool already exist; the new work is argument handling, one sawhorse call, one validate call and the pair-recording branch.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "joiner-cli",
+          "module_path": null,
+          "target_files": [
+            "joiner/crates/joiner-cli/src,joiner/crates/joiner-core/src/telemetry/spool.rs"
+          ],
+          "target_symbols": [
+            "joiner_core::telemetry::spool::SpoolSink"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793252021819,
+        "updated_at_epoch_ms": 1793252021819
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "edge_added",
+      "task_id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+      "edge": {
+        "kind": "related_to",
+        "target_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
+        "target_ticket_key": "GB-161"
+      },
+      "timestamp_ms": 1793252048518
+    },
+    {
+      "event": "task_verified",
+      "task_id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+      "receipt": {
+        "verifier": "cline",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as GB-182 because rabbet cannot ingest the bare form.",
+        "verified_at_epoch_ms": 1793302181005,
+        "git_branch": "main",
+        "base_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
+        "head_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
+        "commit_shas": [
+          "f9a516b32686f1a56765d95bd7819760c0a5f01c"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793953184686
+    },
+    {
+      "event": "task_archived",
+      "task_id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
+      "status": "verified",
+      "timestamp_ms": 1794038012745
+    }
+  ]
+}

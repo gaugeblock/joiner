@@ -1,0 +1,146 @@
+{
+  "ticket": {
+    "id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+    "ticket_key": "GB-173",
+    "slug": "joiner-core-does-not-compile-on-main-missing-contracts-dep-plus-two-type-errors-61705a",
+    "title": "joiner-core does not compile on main: missing contracts dep plus two type errors",
+    "description": "joiner-core does not build on main, and one of its three errors has a known remedy. (1) It has no gaugeblock-contracts dependency, so the telemetry re-exports added by GB-165 slice 2 cannot resolve. (2) verifier.rs reports a [DiagnosticSpan] value whose size is unknown at compile time. (3) router.rs passes miter_engine::Language where the wire Language is expected - the same class of error GB-172 found in batten: c88b13c deleted dado language_serde and retyped dado onto gaugeblock-contracts Language, but never swept joiner. Fix (3) by adopting the wire Language exactly as batten a1c8381 did, not by restoring an adapter. Needs its own branch and an outfeed gate run over joiner, which has evidently not happened in some time.",
+    "kind": "bug",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "joiner-core",
+      "module_path": null,
+      "target_files": [
+        "joiner/crates/joiner-core/Cargo.toml,joiner/crates/joiner-core/src/verifier.rs,joiner/crates/joiner-core/src/router.rs"
+      ],
+      "target_symbols": [],
+      "labels": []
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "cline",
+      "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "Closed on joiner main at 353a030, developed on fix/joiner-build with the lease taken before any edit. joiner-core did not compile for three reasons, one being the omission GB-172 also found: dado c88b13c deleted language_serde under the GB-143 repoint and never swept its dependents. Fixed by adding gaugeblock-contracts as a direct dependency, retyping Language to the wire enum across model, router, telemetry spool, synthesis and three test files (removing the pattern-registry mismatches), and dropping the dead serde attribute since the wire Language already serialises canonical lowercase and reads leniently. The earlier [DiagnosticSpan] sizing error was a cascade and disappeared with the types resolved. Deliberately not done: re-exporting the contracts trace record collided with sawhorse-core own CompilerDiagnostic and VerificationReport in four files, so reconciling that duplication stays a separate decision rather than being smuggled into a build fix. Gates: fmt clean, clippy --workspace --all-targets -D warnings clean, nextest 22/22.",
+      "verified_at_epoch_ms": 1793256052268,
+      "git_branch": "main",
+      "base_commit_sha": "353a03055e879309739bb6836872fe26a99f3918",
+      "head_commit_sha": "353a03055e879309739bb6836872fe26a99f3918",
+      "commit_shas": [
+        "353a03055e879309739bb6836872fe26a99f3918"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793254796204,
+    "updated_at_epoch_ms": 1794038013751,
+    "archived_at_epoch_ms": 1794038013751
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+        "ticket_key": "GB-173",
+        "slug": "joiner-core-does-not-compile-on-main-missing-contracts-dep-plus-two-type-errors-61705a",
+        "title": "joiner-core does not compile on main: missing contracts dep plus two type errors",
+        "description": "Discovered while promoting the telemetry record (GB-165 slice 2): joiner-core does not build on main, with errors unrelated to that change - it has no gaugeblock-contracts dependency at all (unresolved import after model.rs re-exports the shared types), verifier.rs reports a [DiagnosticSpan] value whose size cannot be known at compile time, and router.rs passes miter_engine::Language where dado_core::Language is expected. Two uncompilable members (this and batten, GB-172) mean no gate has covered them recently. Needs its own branch: add the contracts dependency, then resolve the two type errors, then run outfeed gate on joiner.",
+        "kind": "bug",
+        "status": "triage",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "joiner-core",
+          "module_path": null,
+          "target_files": [
+            "joiner/crates/joiner-core/Cargo.toml,joiner/crates/joiner-core/src/verifier.rs,joiner/crates/joiner-core/src/router.rs"
+          ],
+          "target_symbols": [],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793254796204,
+        "updated_at_epoch_ms": 1793254796204
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "task_updated",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "title": null,
+      "description": "joiner-core does not build on main, and one of its three errors has a known remedy. (1) It has no gaugeblock-contracts dependency, so the telemetry re-exports added by GB-165 slice 2 cannot resolve. (2) verifier.rs reports a [DiagnosticSpan] value whose size is unknown at compile time. (3) router.rs passes miter_engine::Language where the wire Language is expected - the same class of error GB-172 found in batten: c88b13c deleted dado language_serde and retyped dado onto gaugeblock-contracts Language, but never swept joiner. Fix (3) by adopting the wire Language exactly as batten a1c8381 did, not by restoring an adapter. Needs its own branch and an outfeed gate run over joiner, which has evidently not happened in some time.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1793255418077
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "claim": {
+        "agent_id": "cline",
+        "claimed_at_epoch_ms": 1793255555019,
+        "lease_expires_at_epoch_ms": 1793259155019,
+        "git_branch": "fix/joiner-build",
+        "base_commit_sha": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "from": "triage",
+      "to": "in_progress",
+      "reason": "Claimed by cline",
+      "timestamp_ms": 1793255555019
+    },
+    {
+      "event": "task_verified",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "receipt": {
+        "verifier": "cline",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Closed on joiner main at 353a030, developed on fix/joiner-build with the lease taken before any edit. joiner-core did not compile for three reasons, one being the omission GB-172 also found: dado c88b13c deleted language_serde under the GB-143 repoint and never swept its dependents. Fixed by adding gaugeblock-contracts as a direct dependency, retyping Language to the wire enum across model, router, telemetry spool, synthesis and three test files (removing the pattern-registry mismatches), and dropping the dead serde attribute since the wire Language already serialises canonical lowercase and reads leniently. The earlier [DiagnosticSpan] sizing error was a cascade and disappeared with the types resolved. Deliberately not done: re-exporting the contracts trace record collided with sawhorse-core own CompilerDiagnostic and VerificationReport in four files, so reconciling that duplication stays a separate decision rather than being smuggled into a build fix. Gates: fmt clean, clippy --workspace --all-targets -D warnings clean, nextest 22/22.",
+        "verified_at_epoch_ms": 1793256052268,
+        "git_branch": "main",
+        "base_commit_sha": "353a03055e879309739bb6836872fe26a99f3918",
+        "head_commit_sha": "353a03055e879309739bb6836872fe26a99f3918",
+        "commit_shas": [
+          "353a03055e879309739bb6836872fe26a99f3918"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793289293364
+    },
+    {
+      "event": "task_archived",
+      "task_id": "61705a44-5ee7-4a64-8234-921db1d2e47b",
+      "status": "verified",
+      "timestamp_ms": 1794038013751
+    }
+  ]
+}
