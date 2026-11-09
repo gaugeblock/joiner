@@ -20,15 +20,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_writer(std::io::stderr)
         .init();
 
-    match args.command {
-        args::Command::RunNext(cmd_args) => handlers::handle_run_next(cmd_args).await?,
-        args::Command::Synthesize(cmd_args) => handlers::handle_synthesize(cmd_args).await?,
-        args::Command::Fill(cmd_args) => handlers::handle_fill(cmd_args).await?,
-        args::Command::Daemon(cmd_args) => handlers::handle_daemon(cmd_args).await?,
-        args::Command::Mcp => handlers::handle_mcp().await?,
-        args::Command::Telemetry(cmd_args) => handlers::handle_telemetry(cmd_args).await?,
+    // The dispatch sits inside an async block so its result can be inspected before the span closes. With the `?`
+    // operators where they were, an error returned from `main` and the guard recorded the span as still running -
+    // a status that is accurate for success and silent about failure, which is the one thing a span has to get
+    // right (`GB-339`).
+    let result = async {
+        match args.command {
+            args::Command::RunNext(cmd_args) => handlers::handle_run_next(cmd_args).await?,
+            args::Command::Synthesize(cmd_args) => handlers::handle_synthesize(cmd_args).await?,
+            args::Command::Fill(cmd_args) => handlers::handle_fill(cmd_args).await?,
+            args::Command::Daemon(cmd_args) => handlers::handle_daemon(cmd_args).await?,
+            args::Command::Mcp => handlers::handle_mcp().await?,
+            args::Command::Telemetry(cmd_args) => handlers::handle_telemetry(cmd_args).await?,
+        }
+        Ok(())
     }
+    .await;
 
-    invocation.finish(true);
-    Ok(())
+    invocation.finish(result.is_ok());
+    result
 }
