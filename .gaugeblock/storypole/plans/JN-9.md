@@ -1,4 +1,4 @@
-# Gold yield measurement (GB-213 / GB-225 / GB-227)
+# Gold yield measurement (JN-9 / GB-225 / GB-227)
 
 > Recorded 2026-10-30. Durable home for the numbers behind the Gold path, because a figure that
 > lives only in a chat session has not been recorded (law 12).
