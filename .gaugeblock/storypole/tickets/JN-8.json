@@ -1,0 +1,123 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [
+          "The hole-filler request disables the reasoning trace via ReasoningEffort::None",
+          "A longer probe that previously failed now fills successfully against the live reasoning model",
+          "The budget stays large enough for output, so the two mitigations are independent"
+        ],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793359113229,
+        "decisions": [],
+        "description": "JN-7 raised the fill budget from 1024 to 8192 and its short probe then succeeded, but a longer prompt fails the same way: the live run against cline-pass/deepseek-v4.1-flash-1017 with max_tokens 8192 still returned empty response content, and sawhorse diagnostic names the cause again - the thinking trace consumed the budget before any content. Raising a number is a mitigation whose headroom depends on prompt size. The contract already models the real fix: ReasoningEffort::None makes the payload send thinking disabled plus reasoning_effort none, and a deterministic code filler does not need a reasoning trace at all. Set it on the hole-filler request, keep the larger budget as headroom for output, and assert both in the unit test.",
+        "edges": [],
+        "id": "fd096035-84f9-45a2-9562-5b4112406305",
+        "kind": "bug",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 2,
+        "scope": {
+          "crate_name": "joiner-core",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [
+            "joiner/crates/joiner-core/src/function_fill.rs"
+          ],
+          "target_symbols": []
+        },
+        "slug": "hole-filling-should-disable-the-reasoning-trace-not-just-raise-the-token-budget-fd0960",
+        "status": "ready",
+        "ticket_key": "JN-8",
+        "title": "Hole filling should disable the reasoning trace, not just raise the token budget",
+        "updated_at_epoch_ms": 1793359113229,
+        "verification_receipt": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "4785875330928dc5f2c0b51698929b9054750ce3",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "4785875330928dc5f2c0b51698929b9054750ce3"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "main",
+        "head_commit_sha": "4785875330928dc5f2c0b51698929b9054750ce3",
+        "repo": null,
+        "summary": "ReasoningEffort::None on the hole-filler request; joiner-core tests, clippy and fmt green; the probe that failed at max_tokens 8192 now fills in one attempt with a correct sliding-window implementation, outbox 20 to 22",
+        "verified_at_epoch_ms": 1793359253169,
+        "verifier": "cargo-nextest+live-fill"
+      },
+      "task_id": "fd096035-84f9-45a2-9562-5b4112406305"
+    },
+    {
+      "event": "status_changed",
+      "from": "verified",
+      "reason": "Archived out of active backlog",
+      "task_id": "fd096035-84f9-45a2-9562-5b4112406305",
+      "timestamp_ms": 1793953248667,
+      "to": "archived"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "fd096035-84f9-45a2-9562-5b4112406305",
+      "timestamp_ms": 1794038004709
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [
+      "The hole-filler request disables the reasoning trace via ReasoningEffort::None",
+      "A longer probe that previously failed now fills successfully against the live reasoning model",
+      "The budget stays large enough for output, so the two mitigations are independent"
+    ],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794038004709,
+    "created_at_epoch_ms": 1793359113229,
+    "decisions": [],
+    "description": "JN-7 raised the fill budget from 1024 to 8192 and its short probe then succeeded, but a longer prompt fails the same way: the live run against cline-pass/deepseek-v4.1-flash-1017 with max_tokens 8192 still returned empty response content, and sawhorse diagnostic names the cause again - the thinking trace consumed the budget before any content. Raising a number is a mitigation whose headroom depends on prompt size. The contract already models the real fix: ReasoningEffort::None makes the payload send thinking disabled plus reasoning_effort none, and a deterministic code filler does not need a reasoning trace at all. Set it on the hole-filler request, keep the larger budget as headroom for output, and assert both in the unit test.",
+    "edges": [],
+    "id": "fd096035-84f9-45a2-9562-5b4112406305",
+    "kind": "bug",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 2,
+    "scope": {
+      "crate_name": "joiner-core",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [
+        "joiner/crates/joiner-core/src/function_fill.rs"
+      ],
+      "target_symbols": []
+    },
+    "slug": "hole-filling-should-disable-the-reasoning-trace-not-just-raise-the-token-budget-fd0960",
+    "status": "verified",
+    "ticket_key": "JN-8",
+    "title": "Hole filling should disable the reasoning trace, not just raise the token budget",
+    "updated_at_epoch_ms": 1794038004709,
+    "verification_receipt": {
+      "base_commit_sha": "4785875330928dc5f2c0b51698929b9054750ce3",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "4785875330928dc5f2c0b51698929b9054750ce3"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "main",
+      "head_commit_sha": "4785875330928dc5f2c0b51698929b9054750ce3",
+      "repo": null,
+      "summary": "ReasoningEffort::None on the hole-filler request; joiner-core tests, clippy and fmt green; the probe that failed at max_tokens 8192 now fills in one attempt with a correct sliding-window implementation, outbox 20 to 22",
+      "verified_at_epoch_ms": 1793359253169,
+      "verifier": "cargo-nextest+live-fill"
+    }
+  }
+}

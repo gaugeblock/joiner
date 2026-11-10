@@ -1,0 +1,140 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793149846157,
+        "decisions": [],
+        "description": "Document master neurosymbolic hole-filling orchestrator, System 1/2 routing, compiler error feedback repair loop, telemetry spooling, ADRs, and domain AGENTS.md laws",
+        "edges": [],
+        "id": "f3b9e993-b7d8-4427-89cc-4aae96da954f",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 1,
+        "scope": {
+          "crate_name": "joiner-core",
+          "labels": [],
+          "module_path": null,
+          "repo": "joiner",
+          "target_files": [],
+          "target_symbols": []
+        },
+        "slug": "elevate-joiner-documentation-across-all-9-canonical-documents-f3b9e9",
+        "status": "ready",
+        "ticket_key": "JN-3",
+        "title": "Elevate joiner documentation across all 9 canonical documents",
+        "updated_at_epoch_ms": 1793149846157,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "parent_epic",
+        "target_id": "18bce0d8-44d5-46f7-a936-2a5152239485",
+        "target_repo": "workspace",
+        "target_ticket_key": "GB-110"
+      },
+      "event": "edge_added",
+      "task_id": "f3b9e993-b7d8-4427-89cc-4aae96da954f",
+      "timestamp_ms": 1793149851031
+    },
+    {
+      "claim": {
+        "agent_id": "agent-antigravity",
+        "base_commit_sha": "774894bf848d40de33c9a936560adeefdd1811b5",
+        "claimed_at_epoch_ms": 1793159458303,
+        "git_branch": "feat/joiner-docs-elevation",
+        "lease_expires_at_epoch_ms": 1793163058303
+      },
+      "event": "task_claimed",
+      "task_id": "f3b9e993-b7d8-4427-89cc-4aae96da954f"
+    },
+    {
+      "event": "status_changed",
+      "from": "ready",
+      "reason": "Claimed by agent-antigravity",
+      "task_id": "f3b9e993-b7d8-4427-89cc-4aae96da954f",
+      "timestamp_ms": 1793159458303,
+      "to": "in_progress"
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "774894bf848d40de33c9a936560adeefdd1811b5",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "774894bf848d40de33c9a936560adeefdd1811b5"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "feat/joiner-docs-elevation",
+        "head_commit_sha": "774894bf848d40de33c9a936560adeefdd1811b5",
+        "repo": null,
+        "summary": "Elevated joiner 9-document architecture to gold standard: SPEC formal contracts and repair state machines, ARCHITECTURE end-to-end orchestration and spool outbox, DESIGN 5 concrete ADRs, PRODUCT vision and JTBD, README full CLI reference and Without/With table, CONTRIBUTING Rust setup, ROADMAP horizons, and chalkline 9-doc compliance",
+        "verified_at_epoch_ms": 1793159729052,
+        "verifier": "manual"
+      },
+      "task_id": "f3b9e993-b7d8-4427-89cc-4aae96da954f"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "f3b9e993-b7d8-4427-89cc-4aae96da954f",
+      "timestamp_ms": 1794037978151
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794037978151,
+    "created_at_epoch_ms": 1793149846157,
+    "decisions": [],
+    "description": "Document master neurosymbolic hole-filling orchestrator, System 1/2 routing, compiler error feedback repair loop, telemetry spooling, ADRs, and domain AGENTS.md laws",
+    "edges": [
+      {
+        "kind": "parent_epic",
+        "target_id": "18bce0d8-44d5-46f7-a936-2a5152239485",
+        "target_repo": "workspace",
+        "target_ticket_key": "GB-110"
+      }
+    ],
+    "id": "f3b9e993-b7d8-4427-89cc-4aae96da954f",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 1,
+    "scope": {
+      "crate_name": "joiner-core",
+      "labels": [],
+      "module_path": null,
+      "repo": "joiner",
+      "target_files": [],
+      "target_symbols": []
+    },
+    "slug": "elevate-joiner-documentation-across-all-9-canonical-documents-f3b9e9",
+    "status": "verified",
+    "ticket_key": "JN-3",
+    "title": "Elevate joiner documentation across all 9 canonical documents",
+    "updated_at_epoch_ms": 1794037978151,
+    "verification_receipt": {
+      "base_commit_sha": "774894bf848d40de33c9a936560adeefdd1811b5",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "774894bf848d40de33c9a936560adeefdd1811b5"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "feat/joiner-docs-elevation",
+      "head_commit_sha": "774894bf848d40de33c9a936560adeefdd1811b5",
+      "repo": null,
+      "summary": "Elevated joiner 9-document architecture to gold standard: SPEC formal contracts and repair state machines, ARCHITECTURE end-to-end orchestration and spool outbox, DESIGN 5 concrete ADRs, PRODUCT vision and JTBD, README full CLI reference and Without/With table, CONTRIBUTING Rust setup, ROADMAP horizons, and chalkline 9-doc compliance",
+      "verified_at_epoch_ms": 1793159729052,
+      "verifier": "manual"
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "user",
+      "discovered_from_task_id": "fd096035-84f9-45a2-9562-5b4112406305",
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793359253366,
+        "decisions": [],
+        "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+        "edges": [
+          {
+            "kind": "discovered_from",
+            "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
+          }
+        ],
+        "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "joiner-core",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [
+            "joiner/crates/joiner-core/src/function_fill.rs",
+            "joiner/crates/joiner-core/src/oracle.rs"
+          ],
+          "target_symbols": []
+        },
+        "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+        "status": "deferred",
+        "ticket_key": "JN-9",
+        "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
+        "updated_at_epoch_ms": 1793359253366,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "blocked_by",
+        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
+        "target_ticket_key": "GB-214"
+      },
+      "event": "edge_added",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "timestamp_ms": 1793360270867
+    },
+    {
+      "event": "status_changed",
+      "from": "deferred",
+      "reason": "Blocked by unverified task GB-214",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "timestamp_ms": 1793360270867,
+      "to": "blocked"
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "main",
+        "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "repo": null,
+        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+        "verified_at_epoch_ms": 1793360271049,
+        "verifier": "cargo-nextest"
+      },
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c"
+    },
+    {
+      "event": "status_changed",
+      "from": "verified",
+      "reason": "Archived out of active backlog",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "timestamp_ms": 1793953245565,
+      "to": "archived"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "timestamp_ms": 1794038018258
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794038018258,
+    "created_at_epoch_ms": 1793359253366,
+    "decisions": [],
+    "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+    "edges": [
+      {
+        "kind": "discovered_from",
+        "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
+      },
+      {
+        "kind": "blocked_by",
+        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
+        "target_ticket_key": "GB-214"
+      }
+    ],
+    "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "joiner-core",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [
+        "joiner/crates/joiner-core/src/function_fill.rs",
+        "joiner/crates/joiner-core/src/oracle.rs"
+      ],
+      "target_symbols": []
+    },
+    "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+    "status": "verified",
+    "ticket_key": "JN-9",
+    "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
+    "updated_at_epoch_ms": 1794038018258,
+    "verification_receipt": {
+      "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "main",
+      "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+      "repo": null,
+      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+      "verified_at_epoch_ms": 1793360271049,
+      "verifier": "cargo-nextest"
+    }
+  }
+}

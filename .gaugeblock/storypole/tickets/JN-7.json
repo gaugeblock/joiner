@@ -1,0 +1,142 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "user",
+      "discovered_from_task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793334647804,
+        "decisions": [],
+        "description": "The GB-199 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
+        "edges": [
+          {
+            "kind": "discovered_from",
+            "target_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa"
+          }
+        ],
+        "id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
+        "kind": "bug",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "joiner-cli",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [
+            "joiner/crates/joiner-cli/src/args.rs"
+          ],
+          "target_symbols": []
+        },
+        "slug": "joiner-fill-produces-no-trace-when-the-hole-filler-is-a-reasoning-model-c5c947",
+        "status": "triage",
+        "ticket_key": "JN-7",
+        "title": "joiner fill produces no trace when the hole filler is a reasoning model",
+        "updated_at_epoch_ms": 1793334647804,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "related_to",
+        "target_id": "2922c2e0-0de7-4672-ab3f-820139fab91f",
+        "target_ticket_key": "GB-207"
+      },
+      "event": "edge_added",
+      "task_id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
+      "timestamp_ms": 1793334877702
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "d11b35cde9fabcb903e68c75b1d638add9986bb8",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "d11b35cde9fabcb903e68c75b1d638add9986bb8"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "main",
+        "head_commit_sha": "d11b35cde9fabcb903e68c75b1d638add9986bb8",
+        "repo": null,
+        "summary": "fill budget 1024 to 8192 via FillOptions with a --max-tokens override; joiner-core tests, clippy and fmt green; live joiner fill against cline-pass/deepseek-v4.1-flash-1017 now completes in one attempt at tier Silver and spools the trace, outbox 15 to 17",
+        "verified_at_epoch_ms": 1793339286752,
+        "verifier": "cargo-nextest+live-fill"
+      },
+      "task_id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c"
+    },
+    {
+      "event": "status_changed",
+      "from": "verified",
+      "reason": "Archived out of active backlog",
+      "task_id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
+      "timestamp_ms": 1793953236049,
+      "to": "archived"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
+      "timestamp_ms": 1794038017140
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794038017140,
+    "created_at_epoch_ms": 1793334647804,
+    "decisions": [],
+    "description": "The GB-199 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
+    "edges": [
+      {
+        "kind": "discovered_from",
+        "target_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa"
+      },
+      {
+        "kind": "related_to",
+        "target_id": "2922c2e0-0de7-4672-ab3f-820139fab91f",
+        "target_ticket_key": "GB-207"
+      }
+    ],
+    "id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
+    "kind": "bug",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "joiner-cli",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [
+        "joiner/crates/joiner-cli/src/args.rs"
+      ],
+      "target_symbols": []
+    },
+    "slug": "joiner-fill-produces-no-trace-when-the-hole-filler-is-a-reasoning-model-c5c947",
+    "status": "verified",
+    "ticket_key": "JN-7",
+    "title": "joiner fill produces no trace when the hole filler is a reasoning model",
+    "updated_at_epoch_ms": 1794038017140,
+    "verification_receipt": {
+      "base_commit_sha": "d11b35cde9fabcb903e68c75b1d638add9986bb8",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "d11b35cde9fabcb903e68c75b1d638add9986bb8"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "main",
+      "head_commit_sha": "d11b35cde9fabcb903e68c75b1d638add9986bb8",
+      "repo": null,
+      "summary": "fill budget 1024 to 8192 via FillOptions with a --max-tokens override; joiner-core tests, clippy and fmt green; live joiner fill against cline-pass/deepseek-v4.1-flash-1017 now completes in one attempt at tier Silver and spools the trace, outbox 15 to 17",
+      "verified_at_epoch_ms": 1793339286752,
+      "verifier": "cargo-nextest+live-fill"
+    }
+  }
+}

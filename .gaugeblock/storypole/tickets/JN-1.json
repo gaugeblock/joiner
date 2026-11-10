@@ -1,0 +1,81 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "user",
+      "discovered_from_task_id": null,
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1792729479884,
+        "decisions": [],
+        "description": "sha2 0.11 uses digest 0.11 and hybrid-array, removing direct LowerHex formatting on finalize(). Callers in joiner-core and rabbet-core must format hashes via hex or slice formatting.",
+        "edges": [],
+        "id": "59179b16-812a-4a5c-89da-8e15ea5d777e",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "joiner-core",
+          "labels": [
+            "deps,sha2,crypto"
+          ],
+          "module_path": null,
+          "repo": "joiner",
+          "target_files": [],
+          "target_symbols": [
+            "joiner::core::telemetry::sink,rabbet::core::gate::validator"
+          ]
+        },
+        "slug": "update-sha2-to-0-11-with-hybrid-array-hex-formatting-in-joiner-and-rabbet-59179b",
+        "status": "deferred",
+        "ticket_key": "JN-1",
+        "title": "Update sha2 to 0.11 with hybrid-array hex formatting in joiner and rabbet",
+        "updated_at_epoch_ms": 1792729479884,
+        "verification_receipt": null
+      }
+    },
+    {
+      "acceptance_criteria": null,
+      "description": "Evaluated 2026-10-28: sha2 0.11.1 is available (joiner-core and rabbet-core pin 0.10). Actionable: 0.11 switches hex formatting to hybrid-array, so both crates need the same Digest/hex adaptation plus test-vector revalidation.",
+      "event": "task_updated",
+      "priority": null,
+      "scope": null,
+      "task_id": "59179b16-812a-4a5c-89da-8e15ea5d777e",
+      "timestamp_ms": 1793176861558,
+      "title": null
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "created_at_epoch_ms": 1792729479884,
+    "decisions": [],
+    "description": "Evaluated 2026-10-28: sha2 0.11.1 is available (joiner-core and rabbet-core pin 0.10). Actionable: 0.11 switches hex formatting to hybrid-array, so both crates need the same Digest/hex adaptation plus test-vector revalidation.",
+    "edges": [],
+    "id": "59179b16-812a-4a5c-89da-8e15ea5d777e",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "joiner-core",
+      "labels": [
+        "deps,sha2,crypto"
+      ],
+      "module_path": null,
+      "repo": "joiner",
+      "target_files": [],
+      "target_symbols": [
+        "joiner::core::telemetry::sink,rabbet::core::gate::validator"
+      ]
+    },
+    "slug": "update-sha2-to-0-11-with-hybrid-array-hex-formatting-in-joiner-and-rabbet-59179b",
+    "status": "deferred",
+    "ticket_key": "JN-1",
+    "title": "Update sha2 to 0.11 with hybrid-array hex formatting in joiner and rabbet",
+    "updated_at_epoch_ms": 1793176861558,
+    "verification_receipt": null
+  }
+}
