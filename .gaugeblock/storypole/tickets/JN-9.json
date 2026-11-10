@@ -44,7 +44,7 @@
       "edge": {
         "kind": "blocked_by",
         "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
-        "target_ticket_key": "GB-214"
+        "target_ticket_key": "SH-9"
       },
       "event": "edge_added",
       "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
@@ -53,7 +53,7 @@
     {
       "event": "status_changed",
       "from": "deferred",
-      "reason": "Blocked by unverified task GB-214",
+      "reason": "Blocked by unverified task SH-9",
       "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
       "timestamp_ms": 1793360270867,
       "to": "blocked"
@@ -72,7 +72,7 @@
         "git_branch": "main",
         "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
         "repo": null,
-        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
         "verified_at_epoch_ms": 1793360271049,
         "verifier": "cargo-nextest"
       },
@@ -108,7 +108,7 @@
       {
         "kind": "blocked_by",
         "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
-        "target_ticket_key": "GB-214"
+        "target_ticket_key": "SH-9"
       }
     ],
     "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
@@ -144,7 +144,7 @@
       "git_branch": "main",
       "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
       "repo": null,
-      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by GB-214 (provider 500 on 3 of 5 calls for this prompt shape)",
+      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
       "verified_at_epoch_ms": 1793360271049,
       "verifier": "cargo-nextest"
     }

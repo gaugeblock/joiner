@@ -9,7 +9,7 @@
         "active_claim": null,
         "created_at_epoch_ms": 1793334647804,
         "decisions": [],
-        "description": "The GB-199 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
+        "description": "The MTR-18 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
         "edges": [
           {
             "kind": "discovered_from",
@@ -43,7 +43,7 @@
       "edge": {
         "kind": "related_to",
         "target_id": "2922c2e0-0de7-4672-ab3f-820139fab91f",
-        "target_ticket_key": "GB-207"
+        "target_ticket_key": "SP-23"
       },
       "event": "edge_added",
       "task_id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",
@@ -90,7 +90,7 @@
     "archived_at_epoch_ms": 1794038017140,
     "created_at_epoch_ms": 1793334647804,
     "decisions": [],
-    "description": "The GB-199 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
+    "description": "The MTR-18 dogfood ran joiner fill on a probe function and it exited 1 with HTTP 500 empty response content from cline-pass/deepseek-v4.1-flash at max_tokens 1024. sawhorse own diagnostic names the cause: reasoning models spend the budget in the thinking trace before completion content can be generated, so no candidate is produced and neither a Silver nor a Gold trace is spooled. The default must account for reasoning models, or be configurable per role, otherwise the only Gold-producing path in the suite silently yields nothing.",
     "edges": [
       {
         "kind": "discovered_from",
@@ -99,7 +99,7 @@
       {
         "kind": "related_to",
         "target_id": "2922c2e0-0de7-4672-ab3f-820139fab91f",
-        "target_ticket_key": "GB-207"
+        "target_ticket_key": "SP-23"
       }
     ],
     "id": "c5c947ba-bb30-491d-9de6-2f08a3d74d2c",

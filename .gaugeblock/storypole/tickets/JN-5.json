@@ -40,7 +40,7 @@
       "edge": {
         "kind": "related_to",
         "target_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
-        "target_ticket_key": "GB-161"
+        "target_ticket_key": "MTR-12"
       },
       "event": "edge_added",
       "task_id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
@@ -60,7 +60,7 @@
         "git_branch": "main",
         "head_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
         "repo": null,
-        "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as GB-182 because rabbet cannot ingest the bare form.",
+        "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as CO-6 because rabbet cannot ingest the bare form.",
         "verified_at_epoch_ms": 1793302181005,
         "verifier": "cline"
       },
@@ -92,7 +92,7 @@
       {
         "kind": "related_to",
         "target_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
-        "target_ticket_key": "GB-161"
+        "target_ticket_key": "MTR-12"
       }
     ],
     "id": "36baf66f-0365-4660-9f9c-d0bd3a15cc93",
@@ -129,7 +129,7 @@
       "git_branch": "main",
       "head_commit_sha": "f9a516b32686f1a56765d95bd7819760c0a5f01c",
       "repo": null,
-      "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as GB-182 because rabbet cannot ingest the bare form.",
+      "summary": "Closed on joiner main at f9a516b, developed on feat/joiner-fill. joiner fill <file> [--symbol] asks the hole_filler role for one function, validates against the workspace grammar table via miter_engine::polyglot::syntax_diagnostics, and retries exactly once with the diagnostics before failing; a first-attempt success spools Silver and a repaired success spools Gold carrying rejected_attempt, which is what makes it a DPO pair. Traces go through FileSpoolSink into .gaugeblock/spool/outbox.jsonl with content_hash and are written only on --apply. Verified live against the configured ClinePass provider: filling a stub add() returned a correct implementation in one attempt, tier silver, content_hash recorded, and --apply wrote it back to the file. Four tests cover brace-matched extraction, a missing symbol, fence stripping and syntax assessment. Gates: fmt, clippy -D warnings, nextest 26/26. Two corrections recorded: the sawhorse roles needed no change - hole_filler already had a provider and an earlier sed range made it look empty, so no config commit was needed; and the live run exposed that storypole writes a bare trace while joiner writes a SpoolEntry wrapper, filed as CO-6 because rabbet cannot ingest the bare form.",
       "verified_at_epoch_ms": 1793302181005,
       "verifier": "cline"
     }
