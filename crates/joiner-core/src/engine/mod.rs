@@ -109,6 +109,11 @@ impl JoinerEngine {
             commit_shas: Vec::new(),
             repo: None,
             chain_key: None,
+            // A synthesis receipt is not a git verification: it names no window, so nothing is captured
+            // (`SP-41` made these fields available without making them mandatory).
+            diff_hash: None,
+            diff: None,
+            window_intact: None,
         };
 
         verify_task(&mut store, task.id, Some(receipt), false, false)?;
