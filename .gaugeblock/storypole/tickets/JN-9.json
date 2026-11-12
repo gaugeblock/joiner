@@ -1,117 +1,24 @@
 {
-  "events": [
-    {
-      "captured_by_agent": "user",
-      "discovered_from_task_id": "fd096035-84f9-45a2-9562-5b4112406305",
-      "event": "deferred_item_captured",
-      "task": {
-        "acceptance_criteria": [],
-        "active_claim": null,
-        "created_at_epoch_ms": 1793359253366,
-        "decisions": [],
-        "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
-        "edges": [
-          {
-            "kind": "discovered_from",
-            "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
-          }
-        ],
-        "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-        "kind": "feature",
-        "latest_handoff": null,
-        "plan": null,
-        "priority": 3,
-        "scope": {
-          "crate_name": "joiner-core",
-          "labels": [],
-          "module_path": null,
-          "repo": null,
-          "target_files": [
-            "joiner/crates/joiner-core/src/function_fill.rs",
-            "joiner/crates/joiner-core/src/oracle.rs"
-          ],
-          "target_symbols": []
-        },
-        "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
-        "status": "deferred",
-        "ticket_key": "JN-9",
-        "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
-        "updated_at_epoch_ms": 1793359253366,
-        "verification_receipt": null
-      }
-    },
-    {
-      "edge": {
-        "kind": "blocked_by",
-        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
-        "target_ticket_key": "SH-9"
-      },
-      "event": "edge_added",
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-      "timestamp_ms": 1793360270867
-    },
-    {
-      "event": "status_changed",
-      "from": "deferred",
-      "reason": "Blocked by unverified task SH-9",
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-      "timestamp_ms": 1793360270867,
-      "to": "blocked"
-    },
-    {
-      "event": "task_verified",
-      "receipt": {
-        "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
-        "chain_key": null,
-        "command": "n/a",
-        "commit_shas": [
-          "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
-        ],
-        "diagnostic_count": null,
-        "exit_code": 0,
-        "git_branch": "main",
-        "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
-        "repo": null,
-        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
-        "verified_at_epoch_ms": 1793360271049,
-        "verifier": "cargo-nextest"
-      },
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c"
-    },
-    {
-      "event": "status_changed",
-      "from": "verified",
-      "reason": "Archived out of active backlog",
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-      "timestamp_ms": 1793953245565,
-      "to": "archived"
-    },
-    {
-      "event": "task_archived",
-      "status": "verified",
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-      "timestamp_ms": 1794038018258
-    },
-    {
-      "event": "plan_updated",
-      "plan": {
-        "design_markdown": "# Gold yield measurement (JN-9 / GB-225 / GB-227)\n\n> Recorded 2026-10-30. Durable home for the numbers behind the Gold path, because a figure that\n> lives only in a chat session has not been recorded (law 12).\n\n## Fixture\n\n`/tmp/gb-gold-crate` - one hole, `grapheme_count`, whose doc comment instructs delegation to\n`crate::text::grapheme_count`. The helper exists (it did not until GB-225; see below).\n\n## Yield, four consecutive fills\n\n| Run | Tier | Attempts | Body length |\n|:--|:--|:--|:--|\n| 1 | Silver | 1 | 258 |\n| 2 | **Gold** | 2 | 245 |\n| 3 | Silver | 1 | 225 |\n| 4 | Silver | 1 | 256 |\n\n4/4 produced a validated candidate; 1/4 was Gold (a repair, therefore a DPO pair). Every body was\nreal code - none was the `<filled>` placeholder.\n\n**Small sample, stated plainly:** four runs on one fixture establishes that the path works and gives\nan order-of-magnitude sense of the Gold rate. It does not establish a rate. Ten runs across three\nfixtures would.\n\n## Corpus effect\n\nBefore the guards: ingest accepted 36/36 and the DPO shard held 2 rows whose `chosen` was the literal\n`<filled>` - pairs that train nothing.\n\nAfter GB-225 (joiner sends real bodies) and GB-227 (the gate rejects placeholders): ingest accepts\n33, rejects 7 by name (`add`, `human_bytes`, `smallest_window`, `grapheme_count`), and the shards are\nSFT 16 rows, DPO **1 row with real code**. An empty shard was the honest intermediate state; one\ntrainable pair is the honest result.\n\n## Defects this measurement exposed, in order\n\n1. `requires_streaming` ignored, so the first request could never succeed (GB-217 step 4).\n2. The context dropped the item's doc comment, so the model never saw the guidance (GB-224).\n3. Verification wrote the bare candidate as the whole file, erasing `pub mod text;`, so a correct\ndelegation failed with `cannot find text in the crate root` (GB-225).\n4. The fixture's doc comment promised a helper that did not exist, so every earlier attempt\n   legitimately reached for `unicode_segmentation` (GB-225).\n5. `chosen` was a placeholder because the CLI spooled a literal instead of `FillOutcome::code`\n   (GB-225), and the receiving gate accepted it (GB-227).\n\nEach was invisible until the one before it was fixed, which is why the run count matters more than\nany single green result.\n\n## The 7 legacy placeholder records: not salvageable, regenerable (2026-10-30)\n\nQuestion asked: can those records be backfilled? Answered from the records themselves.\n\n| Tier | Count | `rejected_attempt` | Chosen body | Verdict |\n|:--|:--|:--|:--|:--|\n| Silver | 5 | absent | `<filled>` | nothing stored the code; unrecoverable |\n| Gold | 2 | present (125ch, 89ch) | `<filled>` | only the negative half survives; no pair can be rebuilt |\n\nAll seven scope signatures still resolve to existing fixtures (`/tmp/fill_probe`,\n`/tmp/gb199_probe`, `/tmp/gb-gold-probe`, `/tmp/gb-gold-crate`), so *regeneration* is possible -\nresurrection is not. The content hash was computed over the placeholder trace, so it cannot be used\nto find a better copy either.\n\nDecision: **clean base, no backfill.** Four reasons.\n1. Unrecoverable as pairs - the chosen side was never written anywhere.\n2. Regeneration produces better records: the current path has five fewer defects than when these\n   were written, so a re-run is more likely to yield a usable pair than the original attempt did.\n3. A gate that always prints seven known rejections stops being read - the noise blindness is the\n   real cost, not the seven rows.\n4. The fixtures still exist, so any regeneration that matters can be done deliberately per fixture.\n\nExecuted non-destructively: the seven moved to `.gaugeblock/spool/quarantine/`\n(`outbox-placeholders-2026-10-30.jsonl`, sha256 prefix `9fce3077eeffceb0`), outbox left holding 34\nrecords with zero placeholders. Re-ingest: **34 accepted, 0 rejected**, shards SFT 17 / DPO 1.\nThe spool directory is gitignored, so this document and the ledger carry the evidence.\n\n## Cross-fixture yield study, 2026-10-30 (supersedes the 4-run single-fixture figure)\n\nThree fixtures, three fills each, run sequentially. Each fixture has a documented helper in a\nsibling module and a `todo!()` body that should delegate to it.\n\n| # | Fixture | Hole | Tier | Attempts | Body |\n|:--|:--|:--|:--|:--|:--|\n| a1 | gb-gold-crate | grapheme_count | **Gold** | 2 | 258 |\n| a2 | gb-gold-crate | grapheme_count | Silver | 1 | 225 |\n| a3 | gb-gold-crate | grapheme_count | Silver | 1 | 255 |\n| b1 | gb-fix-net | parse_port | **Gold** | 2 | 278 |\n| b2 | gb-fix-net | parse_port | **Gold** | 2 | 95 |\n| b3 | gb-fix-net | parse_port | Silver | 1 | 283 |\n| c1 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c2 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c3 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n\n**9/9 produced a validated candidate. 3/9 Gold (a repair, therefore a DPO pair). Zero failures.**\nEvery body was real code - no placeholder anywhere.\n\nPer fixture: `parse_port` 2/3 Gold, `grapheme_count` 1/3, `sum_positive` 0/3. The spread is\ninformative rather than noise: `sum_positive` is a one-liner delegation that compiles on the first\ntry, so it cannot produce a repair; `parse_port` needs range and error handling that the first\nattempt plausibly gets wrong, which is what makes a repair likely. **Gold rate is a property of the\nhole, not of the pipeline** - a corpus of trivial holes will be all-Silver no matter how good the\nloop is, and a corpus of Gold pairs needs holes with real failure modes.\n\nCorpus effect of the study: spool 43 records (39 Silver, 4 Gold), ingest 43/43 accepted with zero\nrejections, shards SFT 26 rows and **DPO 4 rows**, each carrying a real body (245, 258, 278 and 95\ncharacters).\n\nCaveat, stated because it matters: three fixtures and nine runs is a usable signal, not a\npopulation. The 33% figure should be read as \"one in three fills repairs\", not as a rate that will\nhold on unfamiliar code.\n",
-        "plan_file_path": ".gaugeblock/storypole/plans/JN-9.md",
-        "steps": [],
-        "summary": "Gold yield measurement (JN-9 / GB-225 / GB-227)",
-        "updated_at_epoch_ms": 1794339338041
-      },
-      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-      "timestamp_ms": 1794339338041
-    }
-  ],
   "ticket": {
-    "acceptance_criteria": [],
-    "active_claim": null,
-    "archived_at_epoch_ms": 1794038018258,
-    "created_at_epoch_ms": 1793359253366,
-    "decisions": [],
+    "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+    "ticket_key": "JN-9",
+    "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+    "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
     "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+    "kind": "feature",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "joiner-core",
+      "module_path": null,
+      "target_files": [
+        "joiner/crates/joiner-core/src/function_fill.rs",
+        "joiner/crates/joiner-core/src/oracle.rs"
+      ],
+      "target_symbols": [],
+      "labels": []
+    },
     "edges": [
       {
         "kind": "discovered_from",
@@ -123,42 +30,141 @@
         "target_ticket_key": "SH-9"
       }
     ],
-    "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
-    "kind": "feature",
-    "latest_handoff": null,
-    "plan": null,
-    "priority": 3,
-    "scope": {
-      "crate_name": "joiner-core",
-      "labels": [],
-      "module_path": null,
-      "repo": null,
-      "target_files": [
-        "joiner/crates/joiner-core/src/function_fill.rs",
-        "joiner/crates/joiner-core/src/oracle.rs"
-      ],
-      "target_symbols": []
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": {
+      "summary": "Gold yield measurement (JN-9 / GB-225 / GB-227)",
+      "design_markdown": "# Gold yield measurement (JN-9 / GB-225 / GB-227)\n\n> Recorded 2026-10-30. Durable home for the numbers behind the Gold path, because a figure that\n> lives only in a chat session has not been recorded (law 12).\n\n## Fixture\n\n`/tmp/gb-gold-crate` - one hole, `grapheme_count`, whose doc comment instructs delegation to\n`crate::text::grapheme_count`. The helper exists (it did not until GB-225; see below).\n\n## Yield, four consecutive fills\n\n| Run | Tier | Attempts | Body length |\n|:--|:--|:--|:--|\n| 1 | Silver | 1 | 258 |\n| 2 | **Gold** | 2 | 245 |\n| 3 | Silver | 1 | 225 |\n| 4 | Silver | 1 | 256 |\n\n4/4 produced a validated candidate; 1/4 was Gold (a repair, therefore a DPO pair). Every body was\nreal code - none was the `<filled>` placeholder.\n\n**Small sample, stated plainly:** four runs on one fixture establishes that the path works and gives\nan order-of-magnitude sense of the Gold rate. It does not establish a rate. Ten runs across three\nfixtures would.\n\n## Corpus effect\n\nBefore the guards: ingest accepted 36/36 and the DPO shard held 2 rows whose `chosen` was the literal\n`<filled>` - pairs that train nothing.\n\nAfter GB-225 (joiner sends real bodies) and GB-227 (the gate rejects placeholders): ingest accepts\n33, rejects 7 by name (`add`, `human_bytes`, `smallest_window`, `grapheme_count`), and the shards are\nSFT 16 rows, DPO **1 row with real code**. An empty shard was the honest intermediate state; one\ntrainable pair is the honest result.\n\n## Defects this measurement exposed, in order\n\n1. `requires_streaming` ignored, so the first request could never succeed (GB-217 step 4).\n2. The context dropped the item's doc comment, so the model never saw the guidance (GB-224).\n3. Verification wrote the bare candidate as the whole file, erasing `pub mod text;`, so a correct\ndelegation failed with `cannot find text in the crate root` (GB-225).\n4. The fixture's doc comment promised a helper that did not exist, so every earlier attempt\n   legitimately reached for `unicode_segmentation` (GB-225).\n5. `chosen` was a placeholder because the CLI spooled a literal instead of `FillOutcome::code`\n   (GB-225), and the receiving gate accepted it (GB-227).\n\nEach was invisible until the one before it was fixed, which is why the run count matters more than\nany single green result.\n\n## The 7 legacy placeholder records: not salvageable, regenerable (2026-10-30)\n\nQuestion asked: can those records be backfilled? Answered from the records themselves.\n\n| Tier | Count | `rejected_attempt` | Chosen body | Verdict |\n|:--|:--|:--|:--|:--|\n| Silver | 5 | absent | `<filled>` | nothing stored the code; unrecoverable |\n| Gold | 2 | present (125ch, 89ch) | `<filled>` | only the negative half survives; no pair can be rebuilt |\n\nAll seven scope signatures still resolve to existing fixtures (`/tmp/fill_probe`,\n`/tmp/gb199_probe`, `/tmp/gb-gold-probe`, `/tmp/gb-gold-crate`), so *regeneration* is possible -\nresurrection is not. The content hash was computed over the placeholder trace, so it cannot be used\nto find a better copy either.\n\nDecision: **clean base, no backfill.** Four reasons.\n1. Unrecoverable as pairs - the chosen side was never written anywhere.\n2. Regeneration produces better records: the current path has five fewer defects than when these\n   were written, so a re-run is more likely to yield a usable pair than the original attempt did.\n3. A gate that always prints seven known rejections stops being read - the noise blindness is the\n   real cost, not the seven rows.\n4. The fixtures still exist, so any regeneration that matters can be done deliberately per fixture.\n\nExecuted non-destructively: the seven moved to `.gaugeblock/spool/quarantine/`\n(`outbox-placeholders-2026-10-30.jsonl`, sha256 prefix `9fce3077eeffceb0`), outbox left holding 34\nrecords with zero placeholders. Re-ingest: **34 accepted, 0 rejected**, shards SFT 17 / DPO 1.\nThe spool directory is gitignored, so this document and the ledger carry the evidence.\n\n## Cross-fixture yield study, 2026-10-30 (supersedes the 4-run single-fixture figure)\n\nThree fixtures, three fills each, run sequentially. Each fixture has a documented helper in a\nsibling module and a `todo!()` body that should delegate to it.\n\n| # | Fixture | Hole | Tier | Attempts | Body |\n|:--|:--|:--|:--|:--|:--|\n| a1 | gb-gold-crate | grapheme_count | **Gold** | 2 | 258 |\n| a2 | gb-gold-crate | grapheme_count | Silver | 1 | 225 |\n| a3 | gb-gold-crate | grapheme_count | Silver | 1 | 255 |\n| b1 | gb-fix-net | parse_port | **Gold** | 2 | 278 |\n| b2 | gb-fix-net | parse_port | **Gold** | 2 | 95 |\n| b3 | gb-fix-net | parse_port | Silver | 1 | 283 |\n| c1 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c2 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c3 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n\n**9/9 produced a validated candidate. 3/9 Gold (a repair, therefore a DPO pair). Zero failures.**\nEvery body was real code - no placeholder anywhere.\n\nPer fixture: `parse_port` 2/3 Gold, `grapheme_count` 1/3, `sum_positive` 0/3. The spread is\ninformative rather than noise: `sum_positive` is a one-liner delegation that compiles on the first\ntry, so it cannot produce a repair; `parse_port` needs range and error handling that the first\nattempt plausibly gets wrong, which is what makes a repair likely. **Gold rate is a property of the\nhole, not of the pipeline** - a corpus of trivial holes will be all-Silver no matter how good the\nloop is, and a corpus of Gold pairs needs holes with real failure modes.\n\nCorpus effect of the study: spool 43 records (39 Silver, 4 Gold), ingest 43/43 accepted with zero\nrejections, shards SFT 26 rows and **DPO 4 rows**, each carrying a real body (245, 258, 278 and 95\ncharacters).\n\nCaveat, stated because it matters: three fixtures and nine runs is a usable signal, not a\npopulation. The 33% figure should be read as \"one in three fills repairs\", not as a rate that will\nhold on unfamiliar code.\n",
+      "steps": [],
+      "plan_file_path": ".gaugeblock/storypole/plans/JN-9.md",
+      "updated_at_epoch_ms": 1794339338041
     },
-    "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
-    "status": "verified",
-    "ticket_key": "JN-9",
-    "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
-    "updated_at_epoch_ms": 1794038018258,
+    "active_claim": null,
+    "latest_handoff": null,
     "verification_receipt": {
-      "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
-      "chain_key": null,
+      "verifier": "cargo-nextest",
       "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
+      "verified_at_epoch_ms": 1793360271049,
+      "git_branch": "main",
+      "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+      "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
       "commit_shas": [
         "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
       ],
-      "diagnostic_count": null,
-      "exit_code": 0,
-      "git_branch": "main",
-      "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
       "repo": null,
-      "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
-      "verified_at_epoch_ms": 1793360271049,
-      "verifier": "cargo-nextest"
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793359253366,
+    "updated_at_epoch_ms": 1794339338041,
+    "archived_at_epoch_ms": 1794038018258
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+        "ticket_key": "JN-9",
+        "slug": "gold-pairs-require-a-syntax-failure-so-the-repair-path-almost-never-fires-dbb69e",
+        "title": "Gold pairs require a syntax failure, so the repair path almost never fires",
+        "description": "Two fill runs now succeed on the first attempt, and the corpus is 22 records with zero rejected_attempt: nothing Gold, therefore no DPO rows and no pattern candidates. That is structural rather than unlucky - the retry in fill_function is triggered by assess_rust, which is a tree-sitter syntax check, so a candidate that parses but is semantically wrong is accepted as Silver and there is no repair to record. Preference pairs for a hole filler need an oracle that can fail: type-check or test failure, which is what joiner oracle.rs and miter verify already provide. Decide whether Gold should be defined by that stronger oracle, and if so route fills through it before spooling.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "joiner-core",
+          "module_path": null,
+          "target_files": [
+            "joiner/crates/joiner-core/src/function_fill.rs",
+            "joiner/crates/joiner-core/src/oracle.rs"
+          ],
+          "target_symbols": [],
+          "labels": []
+        },
+        "edges": [
+          {
+            "kind": "discovered_from",
+            "target_id": "fd096035-84f9-45a2-9562-5b4112406305"
+          }
+        ],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793359253366,
+        "updated_at_epoch_ms": 1793359253366
+      },
+      "captured_by_agent": "user",
+      "discovered_from_task_id": "fd096035-84f9-45a2-9562-5b4112406305"
+    },
+    {
+      "event": "edge_added",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "edge": {
+        "kind": "blocked_by",
+        "target_id": "9a301cae-b72e-4ea9-83cb-c1437e07dced",
+        "target_ticket_key": "SH-9"
+      },
+      "timestamp_ms": 1793360270867
+    },
+    {
+      "event": "status_changed",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "from": "deferred",
+      "to": "blocked",
+      "reason": "Blocked by unverified task SH-9",
+      "timestamp_ms": 1793360270867
+    },
+    {
+      "event": "task_verified",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "receipt": {
+        "verifier": "cargo-nextest",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "VerifyMode::Crate compiles the candidate via miter verify behind a drop-guard restore, with joiner fill --verify-crate; unit tests cover default mode, crate mode and the apply contract; clippy and fmt green. End-to-end Gold demonstration blocked by SH-9 (provider 500 on 3 of 5 calls for this prompt shape)",
+        "verified_at_epoch_ms": 1793360271049,
+        "git_branch": "main",
+        "base_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "head_commit_sha": "52cb60844736fd595f6fd5ed5ffc55f87bd1da65",
+        "commit_shas": [
+          "52cb60844736fd595f6fd5ed5ffc55f87bd1da65"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793953245565
+    },
+    {
+      "event": "task_archived",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "status": "verified",
+      "timestamp_ms": 1794038018258
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "dbb69e48-289e-4ef9-910d-95e9cd76c32c",
+      "plan": {
+        "summary": "Gold yield measurement (JN-9 / GB-225 / GB-227)",
+        "design_markdown": "# Gold yield measurement (JN-9 / GB-225 / GB-227)\n\n> Recorded 2026-10-30. Durable home for the numbers behind the Gold path, because a figure that\n> lives only in a chat session has not been recorded (law 12).\n\n## Fixture\n\n`/tmp/gb-gold-crate` - one hole, `grapheme_count`, whose doc comment instructs delegation to\n`crate::text::grapheme_count`. The helper exists (it did not until GB-225; see below).\n\n## Yield, four consecutive fills\n\n| Run | Tier | Attempts | Body length |\n|:--|:--|:--|:--|\n| 1 | Silver | 1 | 258 |\n| 2 | **Gold** | 2 | 245 |\n| 3 | Silver | 1 | 225 |\n| 4 | Silver | 1 | 256 |\n\n4/4 produced a validated candidate; 1/4 was Gold (a repair, therefore a DPO pair). Every body was\nreal code - none was the `<filled>` placeholder.\n\n**Small sample, stated plainly:** four runs on one fixture establishes that the path works and gives\nan order-of-magnitude sense of the Gold rate. It does not establish a rate. Ten runs across three\nfixtures would.\n\n## Corpus effect\n\nBefore the guards: ingest accepted 36/36 and the DPO shard held 2 rows whose `chosen` was the literal\n`<filled>` - pairs that train nothing.\n\nAfter GB-225 (joiner sends real bodies) and GB-227 (the gate rejects placeholders): ingest accepts\n33, rejects 7 by name (`add`, `human_bytes`, `smallest_window`, `grapheme_count`), and the shards are\nSFT 16 rows, DPO **1 row with real code**. An empty shard was the honest intermediate state; one\ntrainable pair is the honest result.\n\n## Defects this measurement exposed, in order\n\n1. `requires_streaming` ignored, so the first request could never succeed (GB-217 step 4).\n2. The context dropped the item's doc comment, so the model never saw the guidance (GB-224).\n3. Verification wrote the bare candidate as the whole file, erasing `pub mod text;`, so a correct\ndelegation failed with `cannot find text in the crate root` (GB-225).\n4. The fixture's doc comment promised a helper that did not exist, so every earlier attempt\n   legitimately reached for `unicode_segmentation` (GB-225).\n5. `chosen` was a placeholder because the CLI spooled a literal instead of `FillOutcome::code`\n   (GB-225), and the receiving gate accepted it (GB-227).\n\nEach was invisible until the one before it was fixed, which is why the run count matters more than\nany single green result.\n\n## The 7 legacy placeholder records: not salvageable, regenerable (2026-10-30)\n\nQuestion asked: can those records be backfilled? Answered from the records themselves.\n\n| Tier | Count | `rejected_attempt` | Chosen body | Verdict |\n|:--|:--|:--|:--|:--|\n| Silver | 5 | absent | `<filled>` | nothing stored the code; unrecoverable |\n| Gold | 2 | present (125ch, 89ch) | `<filled>` | only the negative half survives; no pair can be rebuilt |\n\nAll seven scope signatures still resolve to existing fixtures (`/tmp/fill_probe`,\n`/tmp/gb199_probe`, `/tmp/gb-gold-probe`, `/tmp/gb-gold-crate`), so *regeneration* is possible -\nresurrection is not. The content hash was computed over the placeholder trace, so it cannot be used\nto find a better copy either.\n\nDecision: **clean base, no backfill.** Four reasons.\n1. Unrecoverable as pairs - the chosen side was never written anywhere.\n2. Regeneration produces better records: the current path has five fewer defects than when these\n   were written, so a re-run is more likely to yield a usable pair than the original attempt did.\n3. A gate that always prints seven known rejections stops being read - the noise blindness is the\n   real cost, not the seven rows.\n4. The fixtures still exist, so any regeneration that matters can be done deliberately per fixture.\n\nExecuted non-destructively: the seven moved to `.gaugeblock/spool/quarantine/`\n(`outbox-placeholders-2026-10-30.jsonl`, sha256 prefix `9fce3077eeffceb0`), outbox left holding 34\nrecords with zero placeholders. Re-ingest: **34 accepted, 0 rejected**, shards SFT 17 / DPO 1.\nThe spool directory is gitignored, so this document and the ledger carry the evidence.\n\n## Cross-fixture yield study, 2026-10-30 (supersedes the 4-run single-fixture figure)\n\nThree fixtures, three fills each, run sequentially. Each fixture has a documented helper in a\nsibling module and a `todo!()` body that should delegate to it.\n\n| # | Fixture | Hole | Tier | Attempts | Body |\n|:--|:--|:--|:--|:--|:--|\n| a1 | gb-gold-crate | grapheme_count | **Gold** | 2 | 258 |\n| a2 | gb-gold-crate | grapheme_count | Silver | 1 | 225 |\n| a3 | gb-gold-crate | grapheme_count | Silver | 1 | 255 |\n| b1 | gb-fix-net | parse_port | **Gold** | 2 | 278 |\n| b2 | gb-fix-net | parse_port | **Gold** | 2 | 95 |\n| b3 | gb-fix-net | parse_port | Silver | 1 | 283 |\n| c1 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c2 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n| c3 | gb-fix-stats | sum_positive | Silver | 1 | 256 |\n\n**9/9 produced a validated candidate. 3/9 Gold (a repair, therefore a DPO pair). Zero failures.**\nEvery body was real code - no placeholder anywhere.\n\nPer fixture: `parse_port` 2/3 Gold, `grapheme_count` 1/3, `sum_positive` 0/3. The spread is\ninformative rather than noise: `sum_positive` is a one-liner delegation that compiles on the first\ntry, so it cannot produce a repair; `parse_port` needs range and error handling that the first\nattempt plausibly gets wrong, which is what makes a repair likely. **Gold rate is a property of the\nhole, not of the pipeline** - a corpus of trivial holes will be all-Silver no matter how good the\nloop is, and a corpus of Gold pairs needs holes with real failure modes.\n\nCorpus effect of the study: spool 43 records (39 Silver, 4 Gold), ingest 43/43 accepted with zero\nrejections, shards SFT 26 rows and **DPO 4 rows**, each carrying a real body (245, 258, 278 and 95\ncharacters).\n\nCaveat, stated because it matters: three fixtures and nine runs is a usable signal, not a\npopulation. The 33% figure should be read as \"one in three fills repairs\", not as a rate that will\nhold on unfamiliar code.\n",
+        "steps": [],
+        "plan_file_path": ".gaugeblock/storypole/plans/JN-9.md",
+        "updated_at_epoch_ms": 1794339338041
+      },
+      "timestamp_ms": 1794339338041
     }
-  }
+  ]
 }
